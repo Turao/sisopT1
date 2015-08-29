@@ -2,7 +2,7 @@
 
 <h1>Estrutura de diretórios de mthread</h1>
 
-<p>pithread/
+<p>pithread/<br>
 |-- bin<br>
 |-- exemplos<br>
 |   |-- exemplo.c<br>
