@@ -10,23 +10,28 @@
 # 
 
 CC=gcc
-LIB_DIR=./lib
-INC_DIR=./include
-BIN_DIR=./bin
-SRC_DIR=./src
+LIB_DIR=./lib/
+INC_DIR=./include/
+BIN_DIR=./bin/
+SRC_DIR=./src/
 
-all: regra1 regra2 regran
+# all: regra1 regra2 regran
+all: libpithread aptList main binary
 
-regra1: #dependências para a regra1
-	$(CC) -o $(BIN_DIR)regra1 $(SRC_DIR)regra1.c -Wall
+binary:
+	$(CC) -o $(BIN_DIR)main $(BIN_DIR)main.o $(BIN_DIR)pithread.o $(BIN_DIR)aptList.o   -Wall
+main:
+	$(CC) -c $(SRC_DIR)main.c -I$(INC_DIR) -Wall
+	mv main.o $(BIN_DIR)
 
-regra2: #dependências para a regra2
-	$(CC) -o $(BIN_DIR)regra2 $(SRC_DIR)regra2.c -Wall
+libpithread:
+	$(CC) -c $(SRC_DIR)pithread.c -I$(INC_DIR) -Wall
+	mv pithread.o $(BIN_DIR)
 
-regran: #dependências para a regran
-	$(CC) -o $(BIN_DIR)regran $(SRC_DIR)regran.c -Wall
+aptList:
+	$(CC) -c $(SRC_DIR)aptList.c -I$(INC_DIR) -Wall
+	mv aptList.o $(BIN_DIR)
 
 clean:
 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
-
 

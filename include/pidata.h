@@ -7,6 +7,8 @@
 #ifndef __pidata__
 #define __pidata__
 
+#include <ucontext.h>
+
 /* NÃO ALTERAR ESSA struct */
 typedef struct TCB { 
 	int	tid; 			// identificador da thread
@@ -19,4 +21,4 @@ typedef struct TCB {
 	struct TCB 	*next; 		// ponteiro para o próximo TCB da lista
 } TCB_t; 
 
-#endif
+#endif //__pidata__
