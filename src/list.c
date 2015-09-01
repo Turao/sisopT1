@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h> 
-#include "aptList.h"
+#include "list.h"
 #include "pidata.h"
 
 /* Lista duplamente encadeada (nao circular) */
 
 
 /* Inicializa os atributos da estrutura */
-void apt_init(AptList* list)
+void list_init(List* list)
 {
 	list->first = NULL;
 	list->last = NULL;
@@ -15,16 +15,16 @@ void apt_init(AptList* list)
 }
 
 /* Retorna um booleano dizendo se a lista passada é vazia */
-bool apt_isEmpty(AptList list)
+bool list_isEmpty(List list)
 {
 	if(list.size == 0) return true;
 	else return false;
 }
 
 /* Insere um elemento no final da lista */
-void apt_append(AptList* list, TCB_t* tcb)
+void list_append(List* list, TCB_t* tcb)
 {
-	if(apt_isEmpty(*list))
+	if(list_isEmpty(*list))
 	{
 		list->first = tcb;
 		list->last = tcb;
@@ -45,9 +45,9 @@ void apt_append(AptList* list, TCB_t* tcb)
 }
 
 /* Insere um elemento no inicio da lista */
-void apt_prepend(AptList* list, TCB_t* tcb)
+void list_prepend(List* list, TCB_t* tcb)
 {
-	if(apt_isEmpty(*list))
+	if(list_isEmpty(*list))
 	{
 		list->first = tcb;
 		list->last = tcb;
@@ -69,16 +69,16 @@ void apt_prepend(AptList* list, TCB_t* tcb)
 
 /* Adiciona uma tcb a lista, de acordo com seu valor */
 /* de creditos definidos durante a criacao (credCreate) */
-void apt_add(AptList* list, TCB_t* tcb)
+void list_add(List* list, TCB_t* tcb)
 {
 	int credCreate = tcb->credCreate;
 
-	if(apt_isEmpty(*list)) apt_append(list, tcb);
+	if(list_isEmpty(*list)) list_append(list, tcb);
 	else
 	{
 		if(list->last->credCreate <= credCreate)
 		{
-			apt_append(list, tcb);
+			list_append(list, tcb);
 		}
 		else
 		{
@@ -106,7 +106,7 @@ void apt_add(AptList* list, TCB_t* tcb)
 					tcb->next = currentTCB;
 					tcb->prev = previousTCB;
 					// caso a tcb seja inserida na primeira posicao,
-					// devemos atualizar o atributo first de AptList
+					// devemos atualizar o atributo first de Queue
 					if(currentTCB == list->first) list->first = tcb;
 
 					list->size += 1;
@@ -134,7 +134,7 @@ void apt_add(AptList* list, TCB_t* tcb)
 
 /* Retorna o elemento da posicao p na lista */
 /* Retorna NULL caso nao exista */
-TCB_t* apt_at(AptList* list, int p)
+TCB_t* list_at(List* list, int p)
 {
 	// por motivos de conveniencia,
 	// como estamos acostumados a usar
@@ -158,9 +158,9 @@ TCB_t* apt_at(AptList* list, int p)
 
 /* Remove o ultimo elemento da lista */
 /* Retorna NULL caso a lista esteja vazia */
-TCB_t* apt_popBack(AptList* list)
+TCB_t* list_popBack(List* list)
 {
-	if(apt_isEmpty(*list))
+	if(list_isEmpty(*list))
 	{
 		return NULL;
 	}
@@ -188,9 +188,9 @@ TCB_t* apt_popBack(AptList* list)
 }
 
 /* Remove o primeiro elemento da lista */
-TCB_t* apt_popFront(AptList* list)
+TCB_t* list_popFront(List* list)
 {
-	if(apt_isEmpty(*list))
+	if(list_isEmpty(*list))
 	{
 		return NULL;
 	}
@@ -217,9 +217,9 @@ TCB_t* apt_popFront(AptList* list)
 	}
 }
 
-void apt_print(AptList list)
+void list_print(List list)
 {
-	printf("Lista de Aptos: \n");
+	printf("\t\t***\t\t List Content: \t\t***\t\n\n");
 	int i = 0;
 	TCB_t* currentTCB = list.first;
 	for (; i < list.size; i++)
@@ -229,4 +229,5 @@ void apt_print(AptList list)
 
 		currentTCB = currentTCB->next;
 	}
+	printf("\n");
 }
