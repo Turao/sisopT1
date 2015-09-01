@@ -34,6 +34,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 
 	newThread->credReal = credCreate;
 	getcontext(&newThread->context);
+	//makecontext(&newThread->context, (void (*)(void)) start, (int) arg);
 
 	//append(&aptos_ativos, newThread);
 	apt_add(&aptos_ativos, newThread);

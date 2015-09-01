@@ -95,10 +95,10 @@ void apt_add(AptList* list, TCB_t* tcb)
 					previousTCB = currentTCB;
 					currentTCB = currentTCB->next;	
 				}
-				// caso os creditos da tcb em questao forem MAIORES ou IGUAIS,
+				// caso os creditos da tcb em questao forem MAIORES,
 				// significa que a tcb que desejamos inserir deve ser colocada atras
 				// da tcb em questao
-				else
+				if(currentTCB->credCreate > credCreate)
 				{
 					if(previousTCB) previousTCB->next = tcb;
 					if(currentTCB) currentTCB->prev = tcb;
@@ -112,6 +112,21 @@ void apt_add(AptList* list, TCB_t* tcb)
 					list->size += 1;
 					break; // e paramos o for
 				}
+				// caso os creditos da tcb em questao forem IGUAIS,
+				// significa que a tcb que desejamos inserir deve ser colocada depois
+				// da tcb em questao, ja que a politica adotada e de FIFO
+				if(currentTCB->credCreate == credCreate)
+				{
+					TCB_t* nextTCB = currentTCB->next;
+					if(nextTCB) nextTCB->prev = tcb;
+					if(currentTCB) currentTCB->next = tcb;
+
+					tcb->next = nextTCB;
+					tcb->prev = currentTCB;
+					list->size += 1;
+					break; // e paramos o for
+				}
+
 			}
 		}
 	}
