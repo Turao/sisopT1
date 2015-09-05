@@ -8,9 +8,12 @@
 
 void* inc(void* param)
 {
+	printf("INC chamado!\t");
 	int* actualParam = param;
 	*actualParam += 1;
-	printf("\nparam: %i", *actualParam);
+	printf("\t parametro passado: %i\n", *actualParam);
+
+	return NULL;
 }
 
 
@@ -20,7 +23,7 @@ int main(int argc, char* argv[])
 
 	int *a = (int*) malloc(sizeof(int));
 	*a = 1;
-	printf("eitanui %d", *a);
+	//printf("eitanui %d", *a);
 
 	
 	picreate(66, &inc, a);
