@@ -27,6 +27,13 @@ int main(int argc, char* argv[])
 
 	
 	picreate(66, &inc, a);
+	picreate(0, &inc, a);
+	picreate(100, &inc, a);
+	picreate(98, &inc, a);
+	picreate(100, &inc, a);
+	picreate(54, &inc, a);
+	picreate(42, &inc, a);
+	picreate(15, &inc, a);
 	// picreate(68, NULL, NULL);
 	// picreate(25, NULL, NULL);
 	// picreate(25, NULL, NULL);
