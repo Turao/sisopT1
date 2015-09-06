@@ -16,3 +16,7 @@ TCB_t* getRunningThread();
 /* Print functions */
 void printThread(TCB_t* thread);
 void printAptos();
+
+//Funções que removem a thread atual do "estado" de running
+TCB_t* deactivateRunningThread();
+TCB_t* expireRunningThread();

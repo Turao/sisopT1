@@ -36,7 +36,6 @@ void* terminateThread()
 	return NULL;
 }
 
-
 // adiciona uma thread a sua fila correspondente
 // baseado em seus creditos de criacao
 void enqueue(TCB_t* thread)
@@ -112,4 +111,32 @@ void printThread(TCB_t* thread)
 
 	printf("\n");
 
+}
+
+//remove a thread atual de runningThread, coloca essa thread na sua devida fila correspondente
+//e retorna a proxima thread na fila de aptos-ativos
+//Talvez seja necessario trocar o nome da função para um mais apropriado
+TCB_t* deactivateRunningThread()
+{
+	enqueue(getRunningThread());
+
+	//Falta setar runningThread para a proxima thread (depende do escalonador)
+
+	//return list_popFront(&aptos_ativos);
+
+	return NULL;
+}
+
+//remove a thread atual de runningThread, coloca essa thread na fila de aptos-expirados
+//e retorna a proxima thread na fila de aptos-ativos
+//Talvez seja necessario trocar o nome da função para um mais apropriado
+TCB_t* expireRunningThread()
+{
+	list_prepend(&aptos_expirados, getRunningThread());
+
+	//Falta setar runningThread para a proxima thread (depende do escalonador)
+
+	//return list_popFront(&aptos_ativos);
+
+	return NULL;
 }
