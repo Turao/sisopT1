@@ -13,8 +13,6 @@
 #define SUCCESS 0
 #define ERROR -1
 
-#define PRIORITY_DECREMENT 10
-
 // no caso, o contexto de saida sera usado para 
 // chamar o escalonador, indicando que a [thread desejada]
 // terminou e deve ser removida da lista de threads aptas
@@ -97,7 +95,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	// e o contexto que sera utilizado nela
 	makecontext(&newThread->context, (void (*)(void)) start, 1, (void*) arg);
 
-	enqueue(newThread);
+	enqueueActive(newThread);
 	printThread(newThread);
 
 	return newThread->tid;
@@ -115,17 +113,17 @@ int piyield(void)
 		runningThread->state = APTO;
 		if(runningThread->credReal >= PRIORITY_DECREMENT)
 		{
-			runningThread->credReal -= PRIORITY_DECREMENT;
-			nextThread = deactivateRunningThread();
+			deactivateRunningThread();
 		}
 		else if(runningThread->credReal < PRIORITY_DECREMENT)
 		{
-			runningThread->credReal = runningThread->credCreate;
-			nextThread = expireRunningThread();
+			expireRunningThread();
 		}
+		// chama o escalonador para pegar a proxima thread
+		nextThread = getNextThread();
 	}
 
-	setcontext(&(nextThread->context)); //Acho que tem uma sintaxe melhor para fazer isso mas eu não me lembrei na hora
+	setcontext(&nextThread->context);
 
 	return SUCCESS;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "scheduler.h"
 #include "list.h"
 
 #define HIGH_PRIORITY_CREDITS 80
@@ -12,15 +13,18 @@
 
 // usar no scheduler, por enquanto esta sendo
 // usado so pra testes
-List aptos_ativos = NEW_LIST;
-List aptos_expirados = NEW_LIST;
-
-List highPriorityQueue;
-List mediumPriorityQueue;
-List lowPriorityQueue;
+AptList aptos_ativos = NEW_APT_LIST;
+AptList aptos_expirados = NEW_APT_LIST;
 
 TCB_t* runningThread;
 
+// pega proxima thread de acordo com 
+// a logica imposta pelo trabalho 
+//
+TCB_t* getNextThread()
+{
+	return NULL;
+}
 
 // apos o termino da thread, essa
 // funcao eh chamada,
@@ -36,9 +40,22 @@ void* terminateThread()
 	return NULL;
 }
 
+void enqueueActive(TCB_t* thread)
+{
+	printf("Thread inserida na fila de aptos ativos.\n");
+	enqueue(&aptos_ativos, thread);
+
+}
+
+void enqueueExpired(TCB_t* thread)
+{
+	printf("Thread inserida na fila de aptos expirados.\n");
+	enqueue(&aptos_expirados, thread);
+}
+
 // adiciona uma thread a sua fila correspondente
 // baseado em seus creditos de criacao
-void enqueue(TCB_t* thread)
+void enqueue(AptList* aptList, TCB_t* thread)
 {
 	// adiciona a thread a sua respectiva
 	// fila, dependendo dos seus creditos
@@ -47,7 +64,7 @@ void enqueue(TCB_t* thread)
 	if(thread->credCreate > HIGH_PRIORITY_CREDITS)
 	{
 		printf("\t High Priority Queue\n");
-		list_append(&highPriorityQueue, thread);
+		list_append(&aptList->highPriorityQueue, thread);
 		// list_print(highPriorityQueue);
 	}
 	else
@@ -55,13 +72,13 @@ void enqueue(TCB_t* thread)
 		if(thread->credCreate > MEDIUM_PRIORITY_CREDITS)
 		{
 			printf("\t Medium Priority Queue\n");
-			list_append(&mediumPriorityQueue, thread);
+			list_append(&aptList->mediumPriorityQueue, thread);
 			// list_print(mediumPriorityQueue);
 		}
 		else
 		{
 			printf("\t Low Priority Queue\n");
-			list_append(&lowPriorityQueue, thread);
+			list_append(&aptList->lowPriorityQueue, thread);
 			// list_print(lowPriorityQueue);
 			printf("\n");
 		}
@@ -72,7 +89,9 @@ void enqueue(TCB_t* thread)
 // usado para receber um valor valido de TID
 int getNewTID()
 {
-	return highPriorityQueue.size + mediumPriorityQueue.size + lowPriorityQueue.size;
+	return aptos_ativos.highPriorityQueue.size +
+		aptos_ativos.mediumPriorityQueue.size +
+		aptos_ativos.lowPriorityQueue.size;
 }
 
 // usado para pegar o ponteiro da thread atual
@@ -85,9 +104,17 @@ TCB_t* getRunningThread()
 // e seu conteudo
 void printAptos()
 {
+	int active = aptos_ativos.highPriorityQueue.size +
+		aptos_ativos.mediumPriorityQueue.size +
+		aptos_ativos.lowPriorityQueue.size;
+
+	int expired = aptos_expirados.highPriorityQueue.size +
+		aptos_expirados.mediumPriorityQueue.size +
+		aptos_expirados.lowPriorityQueue.size;
+
 	printf(" **************************************************** \n");
-	printf(" * Aptos Ativos: %i \t\t", aptos_ativos.size);
-	printf(" * Aptos Expirados: %i \n", aptos_expirados.size);
+	printf(" * Aptos Ativos: %i \t\t", active);
+	printf(" * Aptos Expirados: %i \n", expired);
 	printf(" **************************************************** \n");
 
 	//printf("\t Aptos Ativos\n");
@@ -113,30 +140,36 @@ void printThread(TCB_t* thread)
 
 }
 
-//remove a thread atual de runningThread, coloca essa thread na sua devida fila correspondente
-//e retorna a proxima thread na fila de aptos-ativos
-//Talvez seja necessario trocar o nome da função para um mais apropriado
-TCB_t* deactivateRunningThread()
+// decrementa os creditos da thread em posicao
+// de execucao e coloca ela na fila de aptos ATIVOS
+// seta running thread como NULL por seguranca
+int deactivateRunningThread()
 {
-	enqueue(getRunningThread());
+	TCB_t* runningThread = getRunningThread();
+	if(runningThread == NULL) return ERROR;
 
-	//Falta setar runningThread para a proxima thread (depende do escalonador)
+	runningThread->credReal -= PRIORITY_DECREMENT;
 
-	//return list_popFront(&aptos_ativos);
+	enqueueActive(runningThread);
 
-	return NULL;
+	runningThread = NULL;
+
+	return SUCCESS;
 }
 
-//remove a thread atual de runningThread, coloca essa thread na fila de aptos-expirados
-//e retorna a proxima thread na fila de aptos-ativos
-//Talvez seja necessario trocar o nome da função para um mais apropriado
-TCB_t* expireRunningThread()
+// decrementa os creditos da thread em posicao
+// de execucao e coloca ela na fila de aptos EXPIRADOS
+// seta running thread como NULL por seguranca
+int expireRunningThread()
 {
-	list_prepend(&aptos_expirados, getRunningThread());
+	TCB_t* runningThread = getRunningThread();
+	if(runningThread == NULL) return ERROR;
 
-	//Falta setar runningThread para a proxima thread (depende do escalonador)
+	runningThread->credReal = runningThread->credCreate;
+	
+	enqueueExpired(runningThread);
 
-	//return list_popFront(&aptos_ativos);
+	runningThread = NULL;
 
-	return NULL;
+	return SUCCESS;
 }
