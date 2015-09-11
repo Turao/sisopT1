@@ -225,9 +225,50 @@ void list_print(List list)
 	for (; i < list.size; i++)
 	{
 		printf("\t Thread TID: %3i \t CredCreate: %3i \t CredReal: %3i \n",
-		 currentTCB->tid, currentTCB->credCreate, currentTCB->credReal);
+		currentTCB->tid, currentTCB->credCreate, currentTCB->credReal);
 
 		currentTCB = currentTCB->next;
 	}
 	printf("\n");
+}
+
+TCB_t* list_takeByTID(List* list, int tid)
+{
+	TCB_t* thread = list_findByTID(list, tid);
+	if(thread == NULL) return NULL;
+
+	TCB_t* previousTCB = thread->prev;
+	TCB_t* nextTCB = thread->next;
+
+	// remove a thread da lista, fazendo
+	// com que as threads anterior e posterior
+	// deixem de apontar a thread em questao
+	if(previousTCB != NULL) previousTCB->next = nextTCB;
+	if(nextTCB != NULL)	nextTCB->prev = previousTCB;
+
+	// arruma atributos da estrutura lista 
+	// nos possiveis casos
+	// e decrementa o tamanho da lista
+	if(list->first == thread) list->first = nextTCB;
+	if(list->last == thread) list->last = previousTCB;
+	list->size -= 1;
+
+	return thread;
+}
+
+TCB_t* list_findByTID(List* list, int tid)
+{
+	if(list == NULL) return NULL;
+	int i = 0;
+	TCB_t* currentTCB = list->first;
+	if(currentTCB == NULL) return NULL;
+	
+	for(; i < list->size; i++)
+	{
+		if(currentTCB->tid == tid) return currentTCB;
+
+		currentTCB = currentTCB->next;
+	}
+
+	return NULL;
 }

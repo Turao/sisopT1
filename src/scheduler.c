@@ -16,26 +16,72 @@
 AptList aptos_ativos = NEW_APT_LIST;
 AptList aptos_expirados = NEW_APT_LIST;
 
+List blocked = NEW_LIST;
+
 TCB_t* runningThread;
+
+
+void runThread(TCB_t* thread)
+{
+	printf("Chamando thread de tid: %i\n", thread->tid);
+	setRunningThread(thread);
+	setcontext(&thread->context);
+}
 
 // pega proxima thread de acordo com 
 // a logica imposta pelo trabalho 
 //
 TCB_t* getNextThread()
 {
-	return NULL;
+
+	TCB_t* nextThread = NULL;
+
+	if(aptos_ativos.highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.highPriorityQueue);
+	else if(aptos_ativos.mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.mediumPriorityQueue);
+	else if(aptos_ativos.lowPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.lowPriorityQueue);
+
+	if(nextThread == NULL)
+	{
+		printf("Nao existe thread para executar!\n");
+		printf("Erro de manipulacao de threads no escalonador!\n");
+		return NULL;
+	}
+
+	return nextThread;
+}
+
+void setRunningThread(TCB_t* thread)
+{
+	// if(thread == NULL) printf(" * ERROR * Running thread = NULL\n");
+	// printf("* Setando thread de execucao...\n");
+
+	// remove a thread da fila de aptos, caso essa esteja nela
+	if(apt_takeByTID(&aptos_ativos, thread->tid) != NULL)
+	{
+		runningThread = thread;
+		thread->state = EXECUCAO;
+	}
 }
 
 // apos o termino da thread, essa
-// funcao eh chamada,
+// funcao e chamada,
 // nao sei o que deve ser feito por enquanto
 // so que devemos chamar o escalonador no final
 // pra que ele escolha a proxima thread
 void* terminateThread()
 {
 	//int* actualTID = param;
+	TCB_t* runningThread = getRunningThread();
+	if(runningThread == NULL) 
+	{
+		printf("Nao existe thread em execucao!\n");
+		printf("Erro de manipulacao de threads no escalonador!\n");
+		return NULL;
+	}
+	printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
 
-	printf("\n\t- A thread terminou. -\n");
+	TCB_t* nextThread = getNextThread();
+	if(nextThread != NULL) runThread(nextThread);
 
 	return NULL;
 }
@@ -61,7 +107,7 @@ void enqueue(AptList* aptList, TCB_t* thread)
 	// fila, dependendo dos seus creditos
 	// de criacao
 	printf("Thread adicionada em: ");
-	if(thread->credCreate > HIGH_PRIORITY_CREDITS)
+	if(thread->credReal > HIGH_PRIORITY_CREDITS)
 	{
 		printf("\t High Priority Queue\n");
 		list_append(&aptList->highPriorityQueue, thread);
@@ -69,7 +115,7 @@ void enqueue(AptList* aptList, TCB_t* thread)
 	}
 	else
 	{
-		if(thread->credCreate > MEDIUM_PRIORITY_CREDITS)
+		if(thread->credReal > MEDIUM_PRIORITY_CREDITS)
 		{
 			printf("\t Medium Priority Queue\n");
 			list_append(&aptList->mediumPriorityQueue, thread);
@@ -172,4 +218,60 @@ int expireRunningThread()
 	runningThread = NULL;
 
 	return SUCCESS;
+}
+
+// pega a thread em execucao
+// decrementa em 10 (pois esta saindo da execucao)
+// joga na fila de bloqueadas
+// e define seu estamo como tal
+int blockRunningThread()
+{
+	TCB_t* runningThread = getRunningThread();
+	if(runningThread == NULL) return ERROR;
+
+	runningThread->credReal -= PRIORITY_DECREMENT;
+	runningThread->state = BLOQUEADO;
+
+	list_add(&blocked, runningThread);
+	return SUCCESS;
+}
+
+// retira a thread da lista de bloqueados
+// colocando-a na lista de aptos ativos
+// e incrementa seus creditos em 20
+// TO-DO: melhorar nome?
+int unblockThread(int tid)
+{
+	TCB_t* thread = list_takeByTID(&blocked, tid);
+	if(thread == NULL) return ERROR;
+
+	thread->credReal += UNBLOCK_INCREMENT;
+	if(thread->credReal > CREDITS_MAX)
+	{
+		thread->credReal = CREDITS_MAX;
+	}
+
+	runningThread->state = APTO;
+	enqueueActive(thread);
+
+	return SUCCESS;
+}
+
+// remove uma thread de uma fila de aptos
+// procurando em cada uma de suas
+// filas de prioridade
+TCB_t* apt_takeByTID(AptList* aptList, int tid)
+{
+	if(aptList == NULL) return NULL;
+	TCB_t* threadTaken;
+	threadTaken = list_takeByTID(&aptList->highPriorityQueue, tid);
+	if(threadTaken != NULL) return threadTaken;
+
+	threadTaken = list_takeByTID(&aptList->mediumPriorityQueue, tid);
+	if(threadTaken != NULL) return threadTaken;
+
+	threadTaken = list_takeByTID(&aptList->lowPriorityQueue, tid);
+	if(threadTaken != NULL) return threadTaken;
+
+	return NULL;
 }

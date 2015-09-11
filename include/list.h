@@ -26,4 +26,7 @@ TCB_t* list_popFront(List* list);
 
 void list_print(List list);
 
+TCB_t* list_findByTID(List* list, int tid);
+TCB_t* list_takeByTID(List* list, int tid);
+
 #endif // __LIST__

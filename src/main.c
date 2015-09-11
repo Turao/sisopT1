@@ -13,6 +13,10 @@ void* inc(void* param)
 	*actualParam += 1;
 	printf("\t parametro passado: %i\n", *actualParam);
 
+	piyield();
+
+	printf("ahoy!\n");
+
 	return NULL;
 }
 

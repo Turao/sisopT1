@@ -10,8 +10,13 @@
 #include "list.h"
 #include "scheduler.h"
 
+#define TRUE 1
+#define FALSE 0
+
 #define SUCCESS 0
 #define ERROR -1
+
+#define MAIN_THREAD_CREDITS
 
 // no caso, o contexto de saida sera usado para 
 // chamar o escalonador, indicando que a [thread desejada]
@@ -19,8 +24,28 @@
 ucontext_t* exit_context;
 
 
+
+int mainTCBCreated = FALSE;
+/* FUNCAO QUE NAO TEM NO HEADER
+*  CRIA UMA TCB PARA A MAIN
+*  E A COLOCA NA FILA DE APTOS ATIVOS
+*  COM PRIORIDADE MAXIMA
+*/
+// int createMainTCB()
+// {
+// 	picreate(MAIN_THREAD_CREDITS, (void (*)(void)) main, 0);
+
+// 	mainTCBCreated = TRUE;
+// }
+
+
+
+
+
+
 int picreate (int credCreate, void* (*start)(void*), void *arg)
 {
+	if(!mainTCBCreated) createMainTCB();
 
 	// aloca o espaco do contexto de saida
 	// o contexto de saida contem as informacoes
@@ -98,11 +123,16 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	enqueueActive(newThread);
 	printThread(newThread);
 
+	setRunningThread(newThread);
+	setcontext(&newThread->context);
+
 	return newThread->tid;
 }
 
 int piyield(void)
 {
+	if(!mainTCBCreated) createMainTCB();
+
 	TCB_t* runningThread = getRunningThread();
 	TCB_t* nextThread;
 
@@ -123,27 +153,36 @@ int piyield(void)
 		nextThread = getNextThread();
 	}
 
-	setcontext(&nextThread->context);
+	if(nextThread == NULL) printf(" Erro ao escolher proxima thread! \n");
+	else setcontext(&nextThread->context);
 
 	return SUCCESS;
 }
 
 int piwait(int tid)
 {
+	if(!mainTCBCreated) createMainTCB();
+
 	return SUCCESS;
 }
 
 int pimutex_init(pimutex_t *mtx)
 {
+	if(!mainTCBCreated) createMainTCB();
+
 	return SUCCESS;
 }
 
 int pilock (pimutex_t *mtx)
 {
+	if(!mainTCBCreated) createMainTCB();
+
 	return SUCCESS;
 }
 
 int piunlock (pimutex_t *mtx)
 {
+	if(!mainTCBCreated) createMainTCB();
+
 	return SUCCESS;
 }
