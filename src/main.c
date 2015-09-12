@@ -50,7 +50,13 @@ int main(int argc, char* argv[])
 
 	
 	picreate(91, &inc, a);
+	picreate(91, &inc, a);
 	picreate(95, &ahoy, a);
+	picreate(91, &inc, a);
+	picreate(93, &inc, a);
+	picreate(97, &inc, a);
+	picreate(90, &inc, a);
+	// picreate(97, &inc, a);
 	piyield();
 
 	// picreate(100, &inc, a);

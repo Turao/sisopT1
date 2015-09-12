@@ -68,67 +68,67 @@ void list_prepend(List* list, TCB_t* tcb)
 }
 
 /* Adiciona uma tcb a lista, de acordo com seu valor */
-/* de creditos definidos durante a criacao (credCreate) */
+/* de creditos definidos dinamicamente por credReal */
 void list_add(List* list, TCB_t* tcb)
 {
-	int credCreate = tcb->credCreate;
+	int credReal = tcb->credReal;
 
 	if(list_isEmpty(*list)) list_append(list, tcb);
 	else
 	{
-		if(list->last->credCreate <= credCreate)
+		TCB_t* currentTCB = list->last;
+		printf("1\n");
+		int i = 0;
+		for(; i < list->size; i++)
 		{
-			list_append(list, tcb);
-		}
-		else
-		{
-			int i = 0;
-			TCB_t* currentTCB = list->first;
-			TCB_t* previousTCB = NULL;
-			for(; i < list->size; i++)
+			if(list->last->credReal >= credReal)
 			{
-				// se os creditos da tcb em questao forem menores
-				// do que os creditos da tcb que queremos inserir,
-				// passamos para a proxima da lista
-				if(currentTCB->credCreate < credCreate)
-				{
-					previousTCB = currentTCB;
-					currentTCB = currentTCB->next;	
-				}
-				// caso os creditos da tcb em questao forem MAIORES,
-				// significa que a tcb que desejamos inserir deve ser colocada atras
-				// da tcb em questao
-				if(currentTCB->credCreate > credCreate)
-				{
-					if(previousTCB) previousTCB->next = tcb;
-					if(currentTCB) currentTCB->prev = tcb;
-
-					tcb->next = currentTCB;
-					tcb->prev = previousTCB;
-					// caso a tcb seja inserida na primeira posicao,
-					// devemos atualizar o atributo first de Queue
-					if(currentTCB == list->first) list->first = tcb;
-
-					list->size += 1;
-					break; // e paramos o for
-				}
-				// caso os creditos da tcb em questao forem IGUAIS,
-				// significa que a tcb que desejamos inserir deve ser colocada depois
-				// da tcb em questao, ja que a politica adotada e de FIFO
-				if(currentTCB->credCreate == credCreate)
-				{
-					TCB_t* nextTCB = currentTCB->next;
-					if(nextTCB) nextTCB->prev = tcb;
-					if(currentTCB) currentTCB->next = tcb;
-
-					tcb->next = nextTCB;
-					tcb->prev = currentTCB;
-					list->size += 1;
-					break; // e paramos o for
-				}
-
+				printf("append\n");
+				list_append(list, tcb);
+				break;
 			}
-		}
+
+			if(list->first->credReal < credReal)
+			{
+				printf("preppend\n");
+				list_prepend(list, tcb);
+				break;
+			}
+
+			// se a thread do iterador tem
+			// creditos dinamicos MENORES que
+			// a thread a ser adicionada
+			// devemos andar uma thread a
+			// esquerda na fila
+			if(currentTCB->credReal < credReal)
+			{
+				printf("2\n");
+				currentTCB = currentTCB->prev;
+			}
+			// caso seja MAIOR OU IGUAL
+			// devemos inserir a thread
+			// a direita do iterador
+			// devido a politica adotada (FIFO)
+			else
+			{
+				printf("3\n");
+				TCB_t* leftTCB = currentTCB;
+				TCB_t* rightTCB = currentTCB->next;
+
+				printf("4\n");
+				// linka itens a esquerda
+				leftTCB->next = tcb;
+				tcb->prev = leftTCB;
+
+				printf("5\n");
+				// linka itens a direita
+				if(rightTCB != NULL) rightTCB->prev = tcb;
+				printf("6\n");
+				tcb->next = rightTCB;
+				list->size += 1;
+				break;
+			}
+		}			
 	}
 }
 

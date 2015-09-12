@@ -165,12 +165,7 @@ int piyield(void)
 	}
 
 	if(nextThread == NULL) printf(" Erro ao escolher proxima thread! \n");
-	else 
-	{
-		// runThread(nextThread);
-		setRunningThread(nextThread);
-		swapcontext(&runningThread->context, &nextThread->context);
-	}
+	else runThread(runningThread, nextThread);
 
 	return SUCCESS;
 }

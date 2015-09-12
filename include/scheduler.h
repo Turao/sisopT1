@@ -28,7 +28,7 @@ typedef struct Apts {
 } AptList;
 
 /* Scheduler main functions */
-void runThread(TCB_t* thread);
+void runThread(TCB_t* oldRunning, TCB_t* threadToRun);
 void setRunningThread(TCB_t* thread);
 // void scheduler();
 TCB_t* getNextThread();

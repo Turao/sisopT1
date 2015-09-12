@@ -21,11 +21,11 @@ List blocked = NEW_LIST;
 TCB_t* runningThread;
 
 
-void runThread(TCB_t* thread)
+void runThread(TCB_t* oldRunning, TCB_t* threadToRun)
 {
-	printf("Chamando thread de tid: %i\n", thread->tid);
-	setRunningThread(thread);
-	setcontext(&thread->context);
+	printf("Chamando thread de tid: %i\n", threadToRun->tid);
+	setRunningThread(threadToRun);
+	swapcontext(&oldRunning->context, &threadToRun->context);
 }
 
 // pega proxima thread de acordo com 
@@ -35,9 +35,9 @@ TCB_t* getNextThread()
 {
 	TCB_t* nextThread = NULL;
 
-	list_print(aptos_ativos.highPriorityQueue);
-	list_print(aptos_ativos.mediumPriorityQueue);
-	list_print(aptos_ativos.lowPriorityQueue);
+	// list_print(aptos_ativos.highPriorityQueue);
+	// list_print(aptos_ativos.mediumPriorityQueue);
+	// list_print(aptos_ativos.lowPriorityQueue);
 
 	if(aptos_ativos.highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.highPriorityQueue);
 	else if(aptos_ativos.mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.mediumPriorityQueue);
@@ -82,7 +82,7 @@ void* terminateThread()
 	free(runningThread);
 
 	TCB_t* nextThread = getNextThread();
-	if(nextThread != NULL) runThread(nextThread);
+	if(nextThread != NULL) runThread(runningThread, nextThread);
 
 	return NULL;
 }
@@ -92,6 +92,9 @@ void enqueueActive(TCB_t* thread)
 	printf("Thread inserida na fila de aptos ativos.\n");
 	enqueue(&aptos_ativos, thread);
 
+	list_print(aptos_ativos.highPriorityQueue);
+	list_print(aptos_ativos.mediumPriorityQueue);
+	list_print(aptos_ativos.lowPriorityQueue);
 }
 
 void enqueueExpired(TCB_t* thread)
@@ -111,7 +114,7 @@ void enqueue(AptList* aptList, TCB_t* thread)
 	if(thread->credReal > HIGH_PRIORITY_CREDITS)
 	{
 		printf("\t High Priority Queue\n");
-		list_append(&aptList->highPriorityQueue, thread);
+		list_add(&aptList->highPriorityQueue, thread);
 		// list_print(highPriorityQueue);
 	}
 	else
@@ -119,13 +122,13 @@ void enqueue(AptList* aptList, TCB_t* thread)
 		if(thread->credReal > MEDIUM_PRIORITY_CREDITS)
 		{
 			printf("\t Medium Priority Queue\n");
-			list_append(&aptList->mediumPriorityQueue, thread);
+			list_add(&aptList->mediumPriorityQueue, thread);
 			// list_print(mediumPriorityQueue);
 		}
 		else
 		{
 			printf("\t Low Priority Queue\n");
-			list_append(&aptList->lowPriorityQueue, thread);
+			list_add(&aptList->lowPriorityQueue, thread);
 			// list_print(lowPriorityQueue);
 			printf("\n");
 		}
