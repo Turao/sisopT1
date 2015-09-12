@@ -77,20 +77,17 @@ void list_add(List* list, TCB_t* tcb)
 	else
 	{
 		TCB_t* currentTCB = list->last;
-		printf("1\n");
 		int i = 0;
 		for(; i < list->size; i++)
 		{
 			if(list->last->credReal >= credReal)
 			{
-				printf("append\n");
 				list_append(list, tcb);
 				break;
 			}
 
 			if(list->first->credReal < credReal)
 			{
-				printf("preppend\n");
 				list_prepend(list, tcb);
 				break;
 			}
@@ -102,7 +99,6 @@ void list_add(List* list, TCB_t* tcb)
 			// esquerda na fila
 			if(currentTCB->credReal < credReal)
 			{
-				printf("2\n");
 				currentTCB = currentTCB->prev;
 			}
 			// caso seja MAIOR OU IGUAL
@@ -111,19 +107,15 @@ void list_add(List* list, TCB_t* tcb)
 			// devido a politica adotada (FIFO)
 			else
 			{
-				printf("3\n");
 				TCB_t* leftTCB = currentTCB;
 				TCB_t* rightTCB = currentTCB->next;
 
-				printf("4\n");
 				// linka itens a esquerda
 				leftTCB->next = tcb;
 				tcb->prev = leftTCB;
 
-				printf("5\n");
 				// linka itens a direita
 				if(rightTCB != NULL) rightTCB->prev = tcb;
-				printf("6\n");
 				tcb->next = rightTCB;
 				list->size += 1;
 				break;
