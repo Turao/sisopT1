@@ -16,7 +16,7 @@
 #define SUCCESS 0
 #define ERROR -1
 
-#define MAIN_THREAD_CREDITS
+#define MAIN_THREAD_CREDITS 100
 
 // no caso, o contexto de saida sera usado para 
 // chamar o escalonador, indicando que a [thread desejada]
@@ -31,12 +31,27 @@ int mainTCBCreated = FALSE;
 *  E A COLOCA NA FILA DE APTOS ATIVOS
 *  COM PRIORIDADE MAXIMA
 */
-// int createMainTCB()
-// {
-// 	picreate(MAIN_THREAD_CREDITS, (void (*)(void)) main, 0);
+int createMainTCB()
+{
+	TCB_t* mainThread = (TCB_t*) malloc(sizeof(TCB_t));
+    if (mainThread == NULL){
+        return ERROR;
+    }
+    printf(" * Criando main thread...\n");
+    
+    mainThread->state = EXECUCAO;
+    mainThread->credCreate = MAIN_THREAD_CREDITS;
+    mainThread->credReal = mainThread->credCreate;
+    mainThread->tid = -1;
+    mainThread->next = NULL;
+    mainThread->prev = NULL;
 
-// 	mainTCBCreated = TRUE;
-// }
+ 	getcontext(&mainThread->context);
+    mainTCBCreated = TRUE;
+    setRunningThread(mainThread);    
+
+    return SUCCESS;
+}
 
 
 
@@ -45,7 +60,7 @@ int mainTCBCreated = FALSE;
 
 int picreate (int credCreate, void* (*start)(void*), void *arg)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	// aloca o espaco do contexto de saida
 	// o contexto de saida contem as informacoes
@@ -123,21 +138,17 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	enqueueActive(newThread);
 	printThread(newThread);
 
-	setRunningThread(newThread);
-	setcontext(&newThread->context);
-
 	return newThread->tid;
 }
 
 int piyield(void)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	TCB_t* runningThread = getRunningThread();
 	TCB_t* nextThread;
 
-	if(runningThread == NULL)
-		return ERROR;
+	if(runningThread == NULL) return ERROR;
 	else
 	{
 		runningThread->state = APTO;
@@ -154,35 +165,40 @@ int piyield(void)
 	}
 
 	if(nextThread == NULL) printf(" Erro ao escolher proxima thread! \n");
-	else setcontext(&nextThread->context);
+	else 
+	{
+		// runThread(nextThread);
+		setRunningThread(nextThread);
+		swapcontext(&runningThread->context, &nextThread->context);
+	}
 
 	return SUCCESS;
 }
 
 int piwait(int tid)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	return SUCCESS;
 }
 
 int pimutex_init(pimutex_t *mtx)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	return SUCCESS;
 }
 
 int pilock (pimutex_t *mtx)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	return SUCCESS;
 }
 
 int piunlock (pimutex_t *mtx)
 {
-	if(!mainTCBCreated) createMainTCB();
+	if(mainTCBCreated == FALSE) createMainTCB();
 
 	return SUCCESS;
 }

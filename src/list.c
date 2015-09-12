@@ -190,6 +190,7 @@ TCB_t* list_popBack(List* list)
 /* Remove o primeiro elemento da lista */
 TCB_t* list_popFront(List* list)
 {
+	
 	if(list_isEmpty(*list))
 	{
 		return NULL;
@@ -219,7 +220,7 @@ TCB_t* list_popFront(List* list)
 
 void list_print(List list)
 {
-	printf("\t\t***\t\t List Content: \t\t***\t\n\n");
+	printf("\t\t***\t\t List Content: \t\t %3i elements \t***\t\n\n", list.size);
 	int i = 0;
 	TCB_t* currentTCB = list.first;
 	for (; i < list.size; i++)

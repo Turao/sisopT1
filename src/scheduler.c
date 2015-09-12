@@ -33,8 +33,11 @@ void runThread(TCB_t* thread)
 //
 TCB_t* getNextThread()
 {
-
 	TCB_t* nextThread = NULL;
+
+	list_print(aptos_ativos.highPriorityQueue);
+	list_print(aptos_ativos.mediumPriorityQueue);
+	list_print(aptos_ativos.lowPriorityQueue);
 
 	if(aptos_ativos.highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.highPriorityQueue);
 	else if(aptos_ativos.mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.mediumPriorityQueue);
@@ -52,15 +55,9 @@ TCB_t* getNextThread()
 
 void setRunningThread(TCB_t* thread)
 {
-	// if(thread == NULL) printf(" * ERROR * Running thread = NULL\n");
-	// printf("* Setando thread de execucao...\n");
-
-	// remove a thread da fila de aptos, caso essa esteja nela
-	if(apt_takeByTID(&aptos_ativos, thread->tid) != NULL)
-	{
-		runningThread = thread;
-		thread->state = EXECUCAO;
-	}
+	// e define a thread em questao como executando
+	runningThread = thread;
+	thread->state = EXECUCAO;
 }
 
 // apos o termino da thread, essa
@@ -70,7 +67,7 @@ void setRunningThread(TCB_t* thread)
 // pra que ele escolha a proxima thread
 void* terminateThread()
 {
-	//int* actualTID = param;
+
 	TCB_t* runningThread = getRunningThread();
 	if(runningThread == NULL) 
 	{
@@ -79,6 +76,10 @@ void* terminateThread()
 		return NULL;
 	}
 	printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
+
+	// libero o espaco de memoria alocado para a
+	// thread que terminou
+	free(runningThread);
 
 	TCB_t* nextThread = getNextThread();
 	if(nextThread != NULL) runThread(nextThread);
