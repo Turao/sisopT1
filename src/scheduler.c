@@ -25,8 +25,16 @@ void runThread(TCB_t* oldRunning, TCB_t* threadToRun)
 {
 	printf("Chamando thread de tid: %i\n", threadToRun->tid);
 	setRunningThread(threadToRun);
-	swapcontext(&oldRunning->context, &threadToRun->context);
+	if(oldRunning != NULL)
+	{
+		swapcontext(&oldRunning->context, &threadToRun->context);
+	}
+	else
+	{
+		setcontext(&threadToRun->context);
+	}
 }
+
 
 // pega proxima thread de acordo com 
 // a logica imposta pelo trabalho 
@@ -35,13 +43,13 @@ TCB_t* getNextThread()
 {
 	TCB_t* nextThread = NULL;
 
-	// list_print(aptos_ativos.highPriorityQueue);
-	// list_print(aptos_ativos.mediumPriorityQueue);
-	// list_print(aptos_ativos.lowPriorityQueue);
-
 	if(aptos_ativos.highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.highPriorityQueue);
 	else if(aptos_ativos.mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.mediumPriorityQueue);
 	else if(aptos_ativos.lowPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.lowPriorityQueue);
+
+	// list_print(aptos_ativos.highPriorityQueue);
+	// list_print(aptos_ativos.mediumPriorityQueue);
+	// list_print(aptos_ativos.lowPriorityQueue);
 
 	if(nextThread == NULL)
 	{
@@ -67,24 +75,31 @@ void setRunningThread(TCB_t* thread)
 // pra que ele escolha a proxima thread
 void* terminateThread()
 {
-
+	printf("terminate running pointer %p\n",getRunningThread());
 	TCB_t* runningThread = getRunningThread();
+	printThread(getRunningThread());
+	// printThread(runningThread);
 	if(runningThread == NULL) 
 	{
 		printf("Nao existe thread em execucao!\n");
 		printf("Erro de manipulacao de threads no escalonador!\n");
 		return NULL;
 	}
+	else
+	{
+
 	printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
 
 	// libero o espaco de memoria alocado para a
 	// thread que terminou
 	free(runningThread);
+	
 
 	TCB_t* nextThread = getNextThread();
-	if(nextThread != NULL) runThread(runningThread, nextThread);
+	if(nextThread != NULL) runThread(NULL, nextThread);
 
 	return NULL;
+	}
 }
 
 void enqueueActive(TCB_t* thread)
@@ -174,6 +189,7 @@ void printAptos()
 // imprime o conteudo de uma thread
 void printThread(TCB_t* thread)
 {
+	if(thread == NULL) printf("\n NULL THREAD \n");
 	printf("\n");
 	printf(" * Thread TID: %i \n", thread->tid);
 	printf(" * Thread state: %i \n", thread->state);

@@ -15,16 +15,17 @@ void list_init(List* list)
 }
 
 /* Retorna um booleano dizendo se a lista passada é vazia */
-bool list_isEmpty(List list)
+bool list_isEmpty(List* list)
 {
-	if(list.size == 0) return true;
+	if(list == NULL) return false;
+	if(list->size == 0) return true;
 	else return false;
 }
 
 /* Insere um elemento no final da lista */
 void list_append(List* list, TCB_t* tcb)
 {
-	if(list_isEmpty(*list))
+	if(list_isEmpty(list))
 	{
 		list->first = tcb;
 		list->last = tcb;
@@ -47,7 +48,7 @@ void list_append(List* list, TCB_t* tcb)
 /* Insere um elemento no inicio da lista */
 void list_prepend(List* list, TCB_t* tcb)
 {
-	if(list_isEmpty(*list))
+	if(list_isEmpty(list))
 	{
 		list->first = tcb;
 		list->last = tcb;
@@ -73,7 +74,7 @@ void list_add(List* list, TCB_t* tcb)
 {
 	int credReal = tcb->credReal;
 
-	if(list_isEmpty(*list)) list_append(list, tcb);
+	if(list_isEmpty(list)) list_append(list, tcb);
 	else
 	{
 		TCB_t* currentTCB = list->last;
@@ -152,7 +153,7 @@ TCB_t* list_at(List* list, int p)
 /* Retorna NULL caso a lista esteja vazia */
 TCB_t* list_popBack(List* list)
 {
-	if(list_isEmpty(*list))
+	if(list_isEmpty(list))
 	{
 		return NULL;
 	}
@@ -182,8 +183,7 @@ TCB_t* list_popBack(List* list)
 /* Remove o primeiro elemento da lista */
 TCB_t* list_popFront(List* list)
 {
-	
-	if(list_isEmpty(*list))
+	if(list_isEmpty(list))
 	{
 		return NULL;
 	}
@@ -200,11 +200,16 @@ TCB_t* list_popFront(List* list)
 	else
 	{
 		TCB_t* tcb = list->first;
+		printf("oi\n");
 		TCB_t* newFirst = tcb->next;
+		printf("oi2\n");
 		list->first = newFirst;
+		printf("oi3\n");
 		newFirst->prev = NULL;
+		printf("oi4\n");
 		list->size -= 1;
-		//nao lembro se tem algo mais, deu branco aqui
+		printf("oi5\n");
+		// nao lembro se tem algo mais, deu branco aqui
 		// TO-DO: revisar
 		return tcb;
 	}
@@ -217,8 +222,8 @@ void list_print(List list)
 	TCB_t* currentTCB = list.first;
 	for (; i < list.size; i++)
 	{
-		printf("\t Thread TID: %3i \t CredCreate: %3i \t CredReal: %3i \n",
-		currentTCB->tid, currentTCB->credCreate, currentTCB->credReal);
+		printf("\t Thread TID: %3i \t CredCreate: %3i \t CredReal: %3i \t at: %p \n",
+		currentTCB->tid, currentTCB->credCreate, currentTCB->credReal, currentTCB);
 
 		currentTCB = currentTCB->next;
 	}

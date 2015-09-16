@@ -16,7 +16,7 @@ typedef struct List {
 
 
 void list_init(List* list);
-bool list_isEmpty(List list);
+bool list_isEmpty(List* list);
 void list_append(List* list, TCB_t* tcb);
 void list_prepend(List* list, TCB_t* tcb);
 void list_add(List* list, TCB_t* tcb);

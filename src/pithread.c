@@ -26,6 +26,37 @@ ucontext_t* exit_context;
 
 
 int mainTCBCreated = FALSE;
+
+
+int allocExitContext()
+{
+	exit_context = (ucontext_t*) malloc(sizeof(ucontext_t));
+	if(exit_context == NULL) return ERROR; // erro de alocacao de memoria
+
+	exit_context->uc_link = NULL;
+	exit_context->uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
+		
+	if(exit_context->uc_stack.ss_sp == NULL) // erro de alocacao de memoria
+	{
+		printf("Erro ao alocar a pilha do contexto de saida...\n");
+		//free(exit_context); // libera para nao ter mem. leak
+		return ERROR;
+	}
+	exit_context->uc_stack.ss_size = SIGSTKSZ;
+	// preenche outros campos necessarios que nao sao
+	// muito importantes para o escalonamento
+	// a partir do contexto atual
+	getcontext(exit_context);
+
+	// quando chamado (ou seja, ao final da execucao)
+	// de cada thread, o contexto de saida
+	// deve chamar a funcao de termino de thread,
+	// do escalonador
+	makecontext(exit_context, (void (*)(void)) terminateThread, 0, NULL);
+	return SUCCESS;
+}
+
+
 /* FUNCAO QUE NAO TEM NO HEADER
 *  CRIA UMA TCB PARA A MAIN
 *  E A COLOCA NA FILA DE APTOS ATIVOS
@@ -45,6 +76,16 @@ int createMainTCB()
     mainThread->tid = -1;
     mainThread->next = NULL;
     mainThread->prev = NULL;
+
+    mainThread->context.uc_link = NULL;
+    mainThread->context.uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
+	if(mainThread->context.uc_stack.ss_sp == NULL)
+	{
+		printf("Erro ao alocar a pilha do contexto da nova thread...\n");
+		free(mainThread);
+		return ERROR;
+	}
+	mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
  	getcontext(&mainThread->context);
     mainTCBCreated = TRUE;
@@ -72,29 +113,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	// terminou e deve ser removida da lista de threads aptas
 	if(exit_context == NULL)
 	{
-		exit_context = (ucontext_t*) malloc(sizeof(ucontext_t));
-		if(exit_context == NULL) return ERROR; // erro de alocacao de memoria
-
-		exit_context->uc_link = NULL;
-		exit_context->uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
-		
-		if(exit_context->uc_stack.ss_sp == NULL) // erro de alocacao de memoria
-		{
-			printf("Erro ao alocar a pilha do contexto de saida...\n");
-			free(exit_context); // libera para nao ter mem. leak
-			return ERROR;
-		}
-		exit_context->uc_stack.ss_size = SIGSTKSZ;
-		// preenche outros campos necessarios que nao sao
-		// muito importantes para o escalonamento
-		// a partir do contexto atual
-		getcontext(exit_context);
-
-		// quando chamado (ou seja, ao final da execucao)
-		// de cada thread, o contexto de saida
-		// deve chamar a funcao de termino de thread,
-		// do escalonador
-		makecontext(exit_context, (void (*)(void)) terminateThread, 0, NULL);
+		if(allocExitContext() == ERROR) return ERROR;
 	}
 
 	/**************************************************************/
@@ -121,7 +140,6 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	{
 		printf("Erro ao alocar a pilha do contexto da nova thread...\n");
 		free(newThread);
-		free(exit_context);
 		return ERROR;
 	}
 	newThread->context.uc_stack.ss_size = SIGSTKSZ;
@@ -146,6 +164,7 @@ int piyield(void)
 	if(mainTCBCreated == FALSE) createMainTCB();
 
 	TCB_t* runningThread = getRunningThread();
+	printThread(runningThread);
 	TCB_t* nextThread;
 
 	if(runningThread == NULL) return ERROR;
@@ -160,6 +179,7 @@ int piyield(void)
 		{
 			expireRunningThread();
 		}
+		
 		// chama o escalonador para pegar a proxima thread
 		nextThread = getNextThread();
 	}
