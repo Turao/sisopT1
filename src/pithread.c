@@ -65,20 +65,18 @@ int allocExitContext()
 int createMainTCB()
 {
 	TCB_t* mainThread = (TCB_t*) malloc(sizeof(TCB_t));
-    if (mainThread == NULL){
-        return ERROR;
-    }
-    printf(" * Criando main thread...\n");
+	if (mainThread == NULL) return ERROR;
+	printf(" * Criando main thread...\n");
     
-    mainThread->state = EXECUCAO;
-    mainThread->credCreate = MAIN_THREAD_CREDITS;
-    mainThread->credReal = mainThread->credCreate;
-    mainThread->tid = -1;
-    mainThread->next = NULL;
-    mainThread->prev = NULL;
+	mainThread->state = EXECUCAO;
+	mainThread->credCreate = MAIN_THREAD_CREDITS;
+	mainThread->credReal = mainThread->credCreate;
+	mainThread->tid = -1;
+	mainThread->next = NULL;
+	mainThread->prev = NULL;
 
-    mainThread->context.uc_link = NULL;
-    mainThread->context.uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
+	mainThread->context.uc_link = NULL;
+	mainThread->context.uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
 	if(mainThread->context.uc_stack.ss_sp == NULL)
 	{
 		printf("Erro ao alocar a pilha do contexto da nova thread...\n");
@@ -88,10 +86,10 @@ int createMainTCB()
 	mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
  	getcontext(&mainThread->context);
-    mainTCBCreated = TRUE;
-    setRunningThread(mainThread);    
+	mainTCBCreated = TRUE;
+	setRunningThread(mainThread);    
 
-    return SUCCESS;
+	return SUCCESS;
 }
 
 
@@ -121,7 +119,6 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	printf(" \t\tCriando nova thread...   \n");
 	printf(" **************************************************** \n\n");
 	/**************************************************************/
-
 
 	TCB_t* newThread = (TCB_t*) malloc(sizeof(TCB_t));
 	if(newThread == NULL) return ERROR; // erro de alocacao de memoria
@@ -154,6 +151,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	makecontext(&newThread->context, (void (*)(void)) start, 1, (void*) arg);
 
 	enqueueActive(newThread);
+
 	printThread(newThread);
 
 	return newThread->tid;
@@ -184,10 +182,17 @@ int piyield(void)
 		nextThread = getNextThread();
 	}
 
-	if(nextThread == NULL) printf(" Erro ao escolher proxima thread! \n");
-	else runThread(runningThread, nextThread);
-
-	return SUCCESS;
+	if(nextThread == NULL)
+	{
+		printf(" Erro ao escolher proxima thread! \n");
+		return ERROR;
+	}
+	else
+	{
+		printf("yield TID: %i \n", runningThread->tid);
+		runThread(runningThread, nextThread);
+		return SUCCESS;
+	}
 }
 
 int piwait(int tid)
@@ -201,19 +206,56 @@ int pimutex_init(pimutex_t *mtx)
 {
 	if(mainTCBCreated == FALSE) createMainTCB();
 
-	return SUCCESS;
-}
-
-int pilock (pimutex_t *mtx)
-{
-	if(mainTCBCreated == FALSE) createMainTCB();
+	mtx->flag = 1;
+	mtx->first = NULL;
+	mtx->last = NULL;
 
 	return SUCCESS;
 }
 
-int piunlock (pimutex_t *mtx)
+int pilock(pimutex_t *mtx)
+{
+	printf("lock called\n");
+	if(mainTCBCreated == FALSE) createMainTCB();
+
+	TCB_t* runningThread = getRunningThread();
+	TCB_t* nextThread = NULL;
+
+	if(runningThread == NULL) return ERROR;
+	else if(mtx->flag == 1)
+	{
+		mtx->flag = 0;
+		return SUCCESS;
+	}
+	else if(mtx->flag == 0)
+	{
+		runningThread = getRunningThread();
+		nextThread = getNextThread();
+
+		blockThreadForMutex(mtx, runningThread);
+
+		if(nextThread == NULL)
+		{
+			printf(" Erro ao escolher proxima thread! \n");
+			return ERROR;
+		}
+		else
+		{
+			runThread(runningThread, nextThread);
+			return SUCCESS;
+		}
+	}
+}
+
+int piunlock(pimutex_t *mtx)
 {
 	if(mainTCBCreated == FALSE) createMainTCB();
 
+	mtx->flag = 1;
+	unblockMutexThreads(mtx);
+
+//	printAptos();
+//	printAptosLists();
+	printf("unlock called\n");
 	return SUCCESS;
 }

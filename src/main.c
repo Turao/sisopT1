@@ -8,6 +8,8 @@
 
 #define MAX 100
 
+bool debug = true;
+
 void* inc(void* param)
 {
 	printf("INC chamado!\t");
@@ -40,23 +42,70 @@ void* ahoy(void* param)
 
 	return NULL;
 }
+	pimutex_t ahoy_mutex;
+	pimutex_t another_mutex;
+void* mutex_test(void* param)
+{
+	int* i = param;
+	pilock(&ahoy_mutex);
+	printf("parametro passado: %i\n", *i);
+	pilock(&another_mutex);
+	printf("lock 2\n");
+	piunlock(&another_mutex);
+	piunlock(&ahoy_mutex);
+
+	return NULL;
+}
+
+void* mutex_test2(void* param)
+{
+	int* i = param;
+	pilock(&ahoy_mutex);
+	printf("parametro passado: %i\n", *i);
+	pilock(&another_mutex);
+	printf("lock 2\n");
+	piunlock(&another_mutex);
+	piunlock(&ahoy_mutex);
+
+	return NULL;
+}
 
 
 int main(int argc, char* argv[])
 {
 	//printf("\n Criando thread... \n");
 	//printf("eitanui %d", *a);
+	debug = true;
+
 
 	int* a = (int*) malloc(sizeof(int));
 	int value = 10;
 	a = &value;
 	
-	picreate(91, &inc, a);
-	picreate(91, &inc, a);
-	picreate(91, &inc, a);
-	picreate(91, &inc, a);
-	picreate(91, &inc, a);
-	picreate(91, &inc, a);
+	pimutex_init(&ahoy_mutex);
+	pimutex_init(&another_mutex);
+
+	picreate(100, &mutex_test, a);
+	picreate(90, &mutex_test2, a);
+	picreate(80, &mutex_test2, a);
+	picreate(70, &mutex_test, a);
+	picreate(60, &mutex_test2, a);
+	picreate(50, &mutex_test, a);
+	picreate(40, &mutex_test2, a);
+	picreate(30, &mutex_test, a);
+	picreate(20, &mutex_test2, a);
+	picreate(10, &mutex_test, a);
+
+
+	piyield();
+	return 0;
+
+	//picreate(91, &inc, a);
+	//picreate(91, &inc, a);
+	//picreate(91, &inc, a);
+	//picreate(91, &inc, a);
+	//picreate(91, &inc, a);
+	//picreate(91, &inc, a);
 	// picreate(91, &inc, a);
 	// picreate(91, &inc, a);
 	// picreate(91, &inc, a);
@@ -99,9 +148,4 @@ int main(int argc, char* argv[])
 	// picreate(100, &ahoy, NULL);
 	// picreate(98, &ahoy, NULL);
 	// picreate(99, &inc, NULL);
-
-
-
-	piyield();
-	return 0;
 }

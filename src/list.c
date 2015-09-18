@@ -200,15 +200,15 @@ TCB_t* list_popFront(List* list)
 	else
 	{
 		TCB_t* tcb = list->first;
-		printf("oi\n");
+		//printf("oi\n");
 		TCB_t* newFirst = tcb->next;
-		printf("oi2\n");
+		//printf("oi2\n");
 		list->first = newFirst;
-		printf("oi3\n");
+		//printf("oi3\n");
 		newFirst->prev = NULL;
-		printf("oi4\n");
+		//printf("oi4\n");
 		list->size -= 1;
-		printf("oi5\n");
+		//printf("oi5\n");
 		// nao lembro se tem algo mais, deu branco aqui
 		// TO-DO: revisar
 		return tcb;

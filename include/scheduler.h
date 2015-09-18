@@ -55,4 +55,10 @@ int expireRunningThread();
 int blockRunningThread();
 int unblockThread(int tid);
 
+//Funcoes auxiliares para as funcoes de mutex
+int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread);
+int unblockMutexThreads(pimutex_t *mtx);
+
+void printAptosLists();
+
 #endif // __SCHEDULER__

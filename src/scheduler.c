@@ -88,17 +88,17 @@ void* terminateThread()
 	else
 	{
 
-	printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
+		printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
 
-	// libero o espaco de memoria alocado para a
-	// thread que terminou
-	free(runningThread);
+		// libero o espaco de memoria alocado para a
+		// thread que terminou
+		free(runningThread);
 	
 
-	TCB_t* nextThread = getNextThread();
-	if(nextThread != NULL) runThread(NULL, nextThread);
+		TCB_t* nextThread = getNextThread();
+		if(nextThread != NULL) runThread(NULL, nextThread);
 
-	return NULL;
+		return NULL;
 	}
 }
 
@@ -294,4 +294,57 @@ TCB_t* apt_takeByTID(AptList* aptList, int tid)
 	if(threadTaken != NULL) return threadTaken;
 
 	return NULL;
+}
+
+// recebe um mutex e a thread a ser bloqueada
+// decrementa os creditos da thread em 10 (dez) creditos
+// e coloca a thread na lista de bloqueados do mutex
+int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread)
+{
+	runningThread->credReal -= PRIORITY_DECREMENT;
+	if(runningThread->credReal < 0) runningThread->credReal = 0;
+
+	thread->state = BLOQUEADO;
+	if(mtx->first == NULL) mtx->first = thread;
+
+	thread->prev = mtx->last;
+	thread->next = NULL;
+	mtx->last->next = thread;
+	mtx->last = thread;
+	printf("entered block thread\n");
+	return SUCCESS;
+}
+
+// recebe um um mutex e retira todas as threads da lista
+// de bloqueados do mutex e incrementa 20 (vinte) creditos de cada thread
+int unblockMutexThreads(pimutex_t *mtx)
+{
+
+	TCB_t* currentThread = mtx->first;
+
+	mtx->first = NULL;
+	mtx->last = NULL;
+	
+	while(currentThread != NULL)
+	{
+		currentThread->state = APTO;
+		currentThread->credReal += UNBLOCK_INCREMENT;
+		if(currentThread->credReal > CREDITS_MAX)
+		{
+			currentThread->credReal = CREDITS_MAX;
+		}
+
+		enqueueActive(currentThread);
+
+		currentThread = currentThread->next;
+	}
+
+	return SUCCESS;
+}
+
+void printAptosLists()
+{
+	list_print(aptos_ativos.highPriorityQueue);
+	list_print(aptos_ativos.mediumPriorityQueue);
+	list_print(aptos_ativos.lowPriorityQueue);
 }
