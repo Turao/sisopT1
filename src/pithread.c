@@ -8,6 +8,7 @@
 #include "pidata.h"
 
 #include "list.h"
+#include "waitingList.h"
 #include "scheduler.h"
 
 #define TRUE 1
@@ -162,7 +163,7 @@ int piyield(void)
 	if(mainTCBCreated == FALSE) createMainTCB();
 
 	TCB_t* runningThread = getRunningThread();
-	printThread(runningThread);
+	// printThread(runningThread);
 	TCB_t* nextThread;
 
 	if(runningThread == NULL) return ERROR;
@@ -189,7 +190,7 @@ int piyield(void)
 	}
 	else
 	{
-		printf("yield TID: %i \n", runningThread->tid);
+		// printf("yield TID: %i \n", runningThread->tid);
 		runThread(runningThread, nextThread);
 		return SUCCESS;
 	}
@@ -199,14 +200,61 @@ int piwait(int tid)
 {
 	if(mainTCBCreated == FALSE) createMainTCB();
 
-	return SUCCESS;
+	// thread a ser esperada existe?
+	// para isso, procuramos a thread na lista de aptos ativos
+	AptList* aptList = getAptosAtivos();
+	TCB_t* toBeWaited = apt_findByTID(aptList, tid);
+	if(toBeWaited == NULL)
+	{
+		// se nao encontrarmos nada na fila de aptos ativos,
+		// procuramos na fila de aptos expirados
+		// e se nao encontrarmos novamente,
+		// eh porque ela nao exite
+		aptList = getAptosExpirados();
+		toBeWaited = apt_findByTID(aptList, tid);
+		if(toBeWaited == NULL) return ERROR;
+	}
+
+	WaitingList* waitingList = getWaitingList();
+
+	// thread TID ja tem outra thread a esperando?
+	if(waitingList_isBeingWaited(waitingList, toBeWaited) != NULL) return ERROR;
+
+	// senao, adiciona a thread a lista de threads em espera
+	WaitingInfo* waitingInfo = (WaitingInfo*) malloc(sizeof(WaitingInfo));
+	if(waitingInfo == NULL) return ERROR;
+	TCB_t* runningThread = getRunningThread();
+	waitingInfo->waiting = runningThread;
+	waitingInfo->beingWaited = toBeWaited;
+	waitingInfo->next = NULL;
+	waitingInfo->prev = NULL;
+
+	blockRunningThread();
+	waitingList_append(waitingList, waitingInfo);
+
+	// chama o escalonador para pegar a proxima thread
+	TCB_t* nextThread = getNextThread();
+	if(nextThread == NULL)
+	{
+		printf(" Erro ao escolher proxima thread! \n");
+		return ERROR;
+	}
+	else
+	{
+		printf("Thread TID: %i \t waiting for thread TID: %i \n",
+		 waitingInfo->waiting->tid, waitingInfo->beingWaited->tid);
+		runThread(runningThread, nextThread);
+		return SUCCESS;
+	}
+
+	return ERROR;
 }
 
 int pimutex_init(pimutex_t *mtx)
 {
 	if(mainTCBCreated == FALSE) createMainTCB();
 
-	mtx->flag = 1;
+	mtx->flag = LIVRE;
 	mtx->first = NULL;
 	mtx->last = NULL;
 
@@ -216,18 +264,20 @@ int pimutex_init(pimutex_t *mtx)
 int pilock(pimutex_t *mtx)
 {
 	printf("lock called\n");
+	if(mtx == NULL) return ERROR;
+
 	if(mainTCBCreated == FALSE) createMainTCB();
 
 	TCB_t* runningThread = getRunningThread();
 	TCB_t* nextThread = NULL;
 
 	if(runningThread == NULL) return ERROR;
-	else if(mtx->flag == 1)
+	else if(mtx->flag == LIVRE)
 	{
-		mtx->flag = 0;
+		mtx->flag = OCUPADO;
 		return SUCCESS;
 	}
-	else if(mtx->flag == 0)
+	else if(mtx->flag == OCUPADO)
 	{
 		runningThread = getRunningThread();
 		nextThread = getNextThread();
@@ -245,13 +295,15 @@ int pilock(pimutex_t *mtx)
 			return SUCCESS;
 		}
 	}
+	return ERROR;
 }
 
 int piunlock(pimutex_t *mtx)
 {
+	if(mtx == NULL) return ERROR;
 	if(mainTCBCreated == FALSE) createMainTCB();
 
-	mtx->flag = 1;
+	mtx->flag = LIVRE;
 	unblockMutexThreads(mtx);
 
 //	printAptos();

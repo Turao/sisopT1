@@ -5,6 +5,7 @@
 #include "pithread.h"
 
 #include "list.h"
+#include "waitingList.h"
 
 #define PRIORITY_DECREMENT 10
 #define UNBLOCK_INCREMENT 20
@@ -19,6 +20,11 @@ enum {
 	EXECUCAO = 2,
 	BLOQUEADO = 3,
 	TERMINO = 4
+};
+
+enum {
+	OCUPADO = 0,
+	LIVRE = 1
 };
 
 typedef struct Apts {
@@ -40,6 +46,7 @@ void enqueue(AptList* aptList, TCB_t* thread);
 
 /* AptList related */
 TCB_t* apt_takeByTID(AptList* aptList, int tid);
+TCB_t* apt_findByTID(AptList* aptList, int tid);
 
 /* 'Attr' getters */
 int getNewTID();
@@ -60,5 +67,10 @@ int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread);
 int unblockMutexThreads(pimutex_t *mtx);
 
 void printAptosLists();
+
+
+AptList* getAptosAtivos();
+AptList* getAptosExpirados();
+WaitingList* getWaitingList();
 
 #endif // __SCHEDULER__

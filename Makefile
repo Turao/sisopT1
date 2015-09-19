@@ -16,10 +16,10 @@ BIN_DIR=./bin/
 SRC_DIR=./src/
 
 # all: regra1 regra2 regran
-all: libpithread scheduler list main binary
+all: libpithread scheduler list waitingList main binary
 
 binary:
-	$(CC) -o $(BIN_DIR)main $(BIN_DIR)main.o $(BIN_DIR)pithread.o $(BIN_DIR)list.o $(BIN_DIR)scheduler.o  -Wall
+	$(CC) -o $(BIN_DIR)main $(BIN_DIR)main.o $(BIN_DIR)pithread.o $(BIN_DIR)list.o  $(BIN_DIR)waitingList.o  $(BIN_DIR)scheduler.o  -Wall
 main:
 	$(CC) -c $(SRC_DIR)main.c -I$(INC_DIR) -Wall
 	mv main.o $(BIN_DIR)
@@ -31,6 +31,10 @@ libpithread:
 list:
 	$(CC) -c $(SRC_DIR)list.c -I$(INC_DIR) -Wall
 	mv list.o $(BIN_DIR)
+
+waitingList:
+	$(CC) -c $(SRC_DIR)waitingList.c -I$(INC_DIR) -Wall
+	mv waitingList.o $(BIN_DIR)
 
 scheduler:
 	$(CC) -c $(SRC_DIR)scheduler.c -I$(INC_DIR) -Wall

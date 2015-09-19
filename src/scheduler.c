@@ -11,6 +11,8 @@
 #define SUCCESS 0
 #define ERROR -1
 
+int _GLOBAL_TID = 0;
+
 // usar no scheduler, por enquanto esta sendo
 // usado so pra testes
 AptList aptos_ativos = NEW_APT_LIST;
@@ -19,6 +21,8 @@ AptList aptos_expirados = NEW_APT_LIST;
 List blocked = NEW_LIST;
 
 TCB_t* runningThread;
+
+WaitingList waitingList = NEW_WAITING_LIST;
 
 
 void runThread(TCB_t* oldRunning, TCB_t* threadToRun)
@@ -90,6 +94,15 @@ void* terminateThread()
 
 		printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
 
+		// checa se a thread estava sendo esperada por outra
+		// se estiver, libera a thread na fila de bloqueados
+		WaitingInfo* waitingInfo = waitingList_isBeingWaited(&waitingList, runningThread);
+		if(waitingInfo != NULL)
+		{
+			unblockThread(waitingInfo->waiting->tid);
+			printf("\n\t- Desbloqueando thread de TID: %i. -\n", waitingInfo->waiting->tid);
+		}
+
 		// libero o espaco de memoria alocado para a
 		// thread que terminou
 		free(runningThread);
@@ -154,9 +167,10 @@ void enqueue(AptList* aptList, TCB_t* thread)
 // usado para receber um valor valido de TID
 int getNewTID()
 {
-	return aptos_ativos.highPriorityQueue.size +
-		aptos_ativos.mediumPriorityQueue.size +
-		aptos_ativos.lowPriorityQueue.size;
+	int tid = _GLOBAL_TID;
+	_GLOBAL_TID++;
+
+	return tid;
 }
 
 // usado para pegar o ponteiro da thread atual
@@ -296,6 +310,24 @@ TCB_t* apt_takeByTID(AptList* aptList, int tid)
 	return NULL;
 }
 
+// retorna uma thread sem remove-la da sua
+// fila de aptos
+TCB_t* apt_findByTID(AptList* aptList, int tid)
+{
+	if(aptList == NULL) return NULL;
+	TCB_t* threadFound;
+	threadFound = list_findByTID(&aptList->highPriorityQueue, tid);
+	if(threadFound != NULL) return threadFound;
+
+	threadFound = list_findByTID(&aptList->mediumPriorityQueue, tid);
+	if(threadFound != NULL) return threadFound;
+
+	threadFound = list_findByTID(&aptList->lowPriorityQueue, tid);
+	if(threadFound != NULL) return threadFound;
+
+	return NULL;
+}
+
 // recebe um mutex e a thread a ser bloqueada
 // decrementa os creditos da thread em 10 (dez) creditos
 // e coloca a thread na lista de bloqueados do mutex
@@ -347,4 +379,19 @@ void printAptosLists()
 	list_print(aptos_ativos.highPriorityQueue);
 	list_print(aptos_ativos.mediumPriorityQueue);
 	list_print(aptos_ativos.lowPriorityQueue);
+}
+
+AptList* getAptosAtivos()
+{
+	return &aptos_ativos;
+}
+
+AptList* getAptosExpirados()
+{
+	return &aptos_expirados;
+}
+
+WaitingList* getWaitingList()
+{
+	return &waitingList;
 }

@@ -46,6 +46,8 @@ void* ahoy(void* param)
 	pimutex_t another_mutex;
 void* mutex_test(void* param)
 {
+	printf("mutex_test chamado!\n");
+
 	int* i = param;
 	pilock(&ahoy_mutex);
 	printf("parametro passado: %i\n", *i);
@@ -59,6 +61,12 @@ void* mutex_test(void* param)
 
 void* mutex_test2(void* param)
 {
+	int* a = (int*) malloc(sizeof(int));
+	*a = 10;
+	int tid = picreate(10, &mutex_test, a);
+	int result = piwait(tid);
+	printf("mutex_test2: piwait chamado! \t resultado: %i\n", result);
+	
 	int* i = param;
 	pilock(&ahoy_mutex);
 	printf("parametro passado: %i\n", *i);
@@ -79,25 +87,31 @@ int main(int argc, char* argv[])
 
 
 	int* a = (int*) malloc(sizeof(int));
-	int value = 10;
-	a = &value;
+	*a = 10;
 	
 	pimutex_init(&ahoy_mutex);
 	pimutex_init(&another_mutex);
 
-	picreate(100, &mutex_test, a);
-	picreate(90, &mutex_test2, a);
-	picreate(80, &mutex_test2, a);
-	picreate(70, &mutex_test, a);
-	picreate(60, &mutex_test2, a);
-	picreate(50, &mutex_test, a);
-	picreate(40, &mutex_test2, a);
-	picreate(30, &mutex_test, a);
-	picreate(20, &mutex_test2, a);
-	picreate(10, &mutex_test, a);
+	// picreate(100, &mutex_test, a);
+	// picreate(90, &mutex_test2, a);
+	// picreate(80, &mutex_test2, a);
+	// picreate(70, &mutex_test, a);
+	// picreate(60, &mutex_test2, a);
+	// picreate(50, &mutex_test, a);
+	// picreate(40, &mutex_test2, a);
+	// picreate(30, &mutex_test, a);
+	// picreate(20, &mutex_test2, a);
+	// picreate(10, &mutex_test, a);
 
 
-	piyield();
+	int tid = picreate(25, &mutex_test2, a);
+	printf("chamando piwait\n");
+	int result = piwait(tid);
+	printf("main: piwait chamado! \t resultado: %i\n", result);
+
+
+	free(a);
+	//piyield();
 	return 0;
 
 	//picreate(91, &inc, a);
