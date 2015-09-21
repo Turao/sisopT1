@@ -31,7 +31,7 @@ bool list_isEmpty(List* list);
 void list_append(List* list, TCB_t* tcb);
 
 
-/*com creditos  Adiciona uma tcb ao inicio da lista */
+/*Adiciona uma tcb ao inicio da lista */
 void list_prepend(List* list, TCB_t* tcb);
 
 
@@ -43,15 +43,22 @@ void list_prepend(List* list, TCB_t* tcb);
 void list_add(List* list, TCB_t* tcb);
 
 
-/* Retorna a tcb na posicao i */
-TCB_t* list_at(List* list, int i);
+/* Retorna a tcb na posicao p 
+*  Retorna NULL caso a lista seja vazia
+*  ou nao exista elemento na posicao p
+*/
+TCB_t* list_at(List* list, int p);
 
 
-/* Remove e retorna o ultimo elemento da lista */
+/* Remove e retorna o ultimo elemento da lista
+*  Retorna NULL caso a lista esteja vazia 
+*/
 TCB_t* list_popBack(List* list);
 
 
-/* Remove e retorna o primeiro elemento da lista */
+/* Remove e retorna o primeiro elemento da lista
+*  Retorna NULL caso a lista esteja vazia 
+*/
 TCB_t* list_popFront(List* list);
 
 

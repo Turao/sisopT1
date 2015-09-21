@@ -4,8 +4,9 @@
 
 #include "waitingList.h"
 
-
-/* Inicializa os atributos da lista de threads em espera/esperando */
+/* Inicia os atributos de uma lista de espera
+*  com ponteiros NULL e tamanho 0
+*/
 void waitingList_init(WaitingList* waitingList)
 {
 	waitingList->first = NULL;
@@ -13,7 +14,10 @@ void waitingList_init(WaitingList* waitingList)
 	waitingList->size = 0;
 }
 
-/* Retorna um booleano dizendo se a lista passada é vazia */
+
+/* Retorna True caso seja uma lista de espera vazia,
+*  False caso contrario
+*/
 bool waitingList_isEmpty(WaitingList* waitingList)
 {
 	if(waitingList == NULL) return false;
@@ -21,6 +25,8 @@ bool waitingList_isEmpty(WaitingList* waitingList)
 	else return false;
 }
 
+
+/* Adiciona uma 'informacao de espera' ao final da lista de espera */
 void waitingList_append(WaitingList* waitingList, WaitingInfo* waitingInfo)
 {
 	if(waitingList_isEmpty(waitingList))
@@ -44,8 +50,10 @@ void waitingList_append(WaitingList* waitingList, WaitingInfo* waitingInfo)
 }
 
 
-// void waitingList_takeByTID(WaitingList* waitingList);
-
+/* Ve se uma tcb esta sendo esperada por outra
+*  retorna a 'informacao de espera' caso seja,
+*  retorna NULL caso nao exista a tcb na lista de espera
+*/
 WaitingInfo* waitingList_isBeingWaited(WaitingList* waitingList, TCB_t* tcb)
 {
 	if(waitingList == NULL) return NULL;
@@ -61,6 +69,11 @@ WaitingInfo* waitingList_isBeingWaited(WaitingList* waitingList, TCB_t* tcb)
 	return NULL;
 }
 
+
+/* Ve se uma tcb esta esperando outra
+*  retorna a 'informacao de espera' caso seja,
+*  retorna NULL caso nao exista a tcb na lista de espera
+*/
 WaitingInfo* waitingList_isWaiting(WaitingList* waitingList, TCB_t* tcb)
 {
 	if(waitingList == NULL) return NULL;

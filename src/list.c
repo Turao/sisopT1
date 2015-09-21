@@ -6,7 +6,9 @@
 /* Lista duplamente encadeada (nao circular) */
 
 
-/* Inicializa os atributos da estrutura */
+/* Inicia os atributos da lista
+*  com ponteiros NULL e tamanho 0
+*/
 void list_init(List* list)
 {
 	list->first = NULL;
@@ -14,7 +16,10 @@ void list_init(List* list)
 	list->size = 0;
 }
 
-/* Retorna um booleano dizendo se a lista passada é vazia */
+
+/* Retorna True caso seja uma lista vazia,
+*  False caso contrario
+*/
 bool list_isEmpty(List* list)
 {
 	if(list == NULL) return false;
@@ -22,7 +27,8 @@ bool list_isEmpty(List* list)
 	else return false;
 }
 
-/* Insere um elemento no final da lista */
+
+/* Adiciona uma tcb ao final da lista */
 void list_append(List* list, TCB_t* tcb)
 {
 	if(list_isEmpty(list))
@@ -45,7 +51,8 @@ void list_append(List* list, TCB_t* tcb)
 	}
 }
 
-/* Insere um elemento no inicio da lista */
+
+/*Adiciona uma tcb ao inicio da lista */
 void list_prepend(List* list, TCB_t* tcb)
 {
 	if(list_isEmpty(list))
@@ -68,8 +75,12 @@ void list_prepend(List* list, TCB_t* tcb)
 	}
 }
 
-/* Adiciona uma tcb a lista, de acordo com seu valor */
-/* de creditos definidos dinamicamente por credReal */
+
+/* Adiciona uma tcb a lista seguindo uma ordenacao 
+*  decrescente de creditos dinamicos, seguindo uma
+*  politica de FIFO em caso de duas ou mais tcbs
+*  com creditos dinamicos iguais
+*/
 void list_add(List* list, TCB_t* tcb)
 {
 	int credReal = tcb->credReal;
@@ -125,8 +136,11 @@ void list_add(List* list, TCB_t* tcb)
 	}
 }
 
-/* Retorna o elemento da posicao p na lista */
-/* Retorna NULL caso nao exista */
+
+/* Retorna a tcb na posicao p 
+*  Retorna NULL caso a lista seja vazia
+*  ou nao exista elemento na posicao p
+*/
 TCB_t* list_at(List* list, int p)
 {
 	// por motivos de conveniencia,
@@ -149,8 +163,10 @@ TCB_t* list_at(List* list, int p)
 	}
 }
 
-/* Remove o ultimo elemento da lista */
-/* Retorna NULL caso a lista esteja vazia */
+
+/* Remove e retorna o ultimo elemento da lista
+*  Retorna NULL caso a lista esteja vazia 
+*/
 TCB_t* list_popBack(List* list)
 {
 	if(list_isEmpty(list))
@@ -174,13 +190,14 @@ TCB_t* list_popBack(List* list)
 		list->last = newLast;
 		newLast->next = NULL;
 		list->size -= 1;
-		//nao lembro se tem algo mais, deu branco aqui
-		// TO-DO: revisar
 		return tcb;
 	}
 }
 
-/* Remove o primeiro elemento da lista */
+
+/* Remove e retorna o primeiro elemento da lista
+*  Retorna NULL caso a lista esteja vazia 
+*/
 TCB_t* list_popFront(List* list)
 {
 	if(list_isEmpty(list))
@@ -200,21 +217,16 @@ TCB_t* list_popFront(List* list)
 	else
 	{
 		TCB_t* tcb = list->first;
-		//printf("oi\n");
 		TCB_t* newFirst = tcb->next;
-		//printf("oi2\n");
 		list->first = newFirst;
-		//printf("oi3\n");
 		newFirst->prev = NULL;
-		//printf("oi4\n");
 		list->size -= 1;
-		//printf("oi5\n");
-		// nao lembro se tem algo mais, deu branco aqui
-		// TO-DO: revisar
 		return tcb;
 	}
 }
 
+
+/* Imprime o conteudo de uma lista */
 void list_print(List list)
 {
 	printf("\t\t***\t\t List Content: \t\t %3i elements \t***\t\n\n", list.size);
@@ -230,6 +242,31 @@ void list_print(List list)
 	printf("\n");
 }
 
+
+/* Encontra a tcb na lista passada
+*  Retorna NULL caso nao encontre
+*/
+TCB_t* list_findByTID(List* list, int tid)
+{
+	if(list == NULL) return NULL;
+	int i = 0;
+	TCB_t* currentTCB = list->first;
+	if(currentTCB == NULL) return NULL;
+	
+	for(; i < list->size; i++)
+	{
+		if(currentTCB->tid == tid) return currentTCB;
+
+		currentTCB = currentTCB->next;
+	}
+
+	return NULL;
+}
+
+
+/* Encontra a tcb na lista passada E remove ela da lista
+*  Retorna NULL caso nao encontre
+*/
 TCB_t* list_takeByTID(List* list, int tid)
 {
 	TCB_t* thread = list_findByTID(list, tid);
@@ -252,21 +289,4 @@ TCB_t* list_takeByTID(List* list, int tid)
 	list->size -= 1;
 
 	return thread;
-}
-
-TCB_t* list_findByTID(List* list, int tid)
-{
-	if(list == NULL) return NULL;
-	int i = 0;
-	TCB_t* currentTCB = list->first;
-	if(currentTCB == NULL) return NULL;
-	
-	for(; i < list->size; i++)
-	{
-		if(currentTCB->tid == tid) return currentTCB;
-
-		currentTCB = currentTCB->next;
-	}
-
-	return NULL;
 }

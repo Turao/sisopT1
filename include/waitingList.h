@@ -10,6 +10,7 @@
 #define NEW_WAITING_INFO {NULL, NULL, NULL, NULL}
 #define NEW_WAITING_LIST {NULL, NULL, 0}
 
+
 /* Informacao de espera:
 *  contem a informacao das threads em espera
 *  possuindo a thread que esta esperando (waiting)
