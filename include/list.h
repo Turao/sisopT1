@@ -15,18 +15,59 @@ typedef struct List {
 } List;
 
 
+/* Inicia os atributos da lista
+*  com ponteiros NULL e tamanho 0
+*/
 void list_init(List* list);
+
+
+/* Retorna True caso seja uma lista vazia,
+*  False caso contrario
+*/
 bool list_isEmpty(List* list);
+
+
+/* Adiciona uma tcb ao final da lista */
 void list_append(List* list, TCB_t* tcb);
+
+
+/*com creditos  Adiciona uma tcb ao inicio da lista */
 void list_prepend(List* list, TCB_t* tcb);
+
+
+/* Adiciona uma tcb a lista seguindo uma ordenacao 
+*  decrescente de creditos dinamicos, seguindo uma
+*  politica de FIFO em caso de duas ou mais tcbs
+*  com creditos dinamicos iguais
+*/
 void list_add(List* list, TCB_t* tcb);
+
+
+/* Retorna a tcb na posicao i */
 TCB_t* list_at(List* list, int i);
+
+
+/* Remove e retorna o ultimo elemento da lista */
 TCB_t* list_popBack(List* list);
+
+
+/* Remove e retorna o primeiro elemento da lista */
 TCB_t* list_popFront(List* list);
 
+
+/* Imprime o conteudo de uma lista */
 void list_print(List list);
 
+
+/* Encontra a tcb na lista passada
+*  Retorna NULL caso nao encontre
+*/
 TCB_t* list_findByTID(List* list, int tid);
+
+
+/* Encontra a tcb na lista passada E remove ela da lista
+*  Retorna NULL caso nao encontre
+*/
 TCB_t* list_takeByTID(List* list, int tid);
 
 #endif // __LIST__
