@@ -72,7 +72,7 @@ int createMainTCB()
 	mainThread->state = EXECUCAO;
 	mainThread->credCreate = MAIN_THREAD_CREDITS;
 	mainThread->credReal = mainThread->credCreate;
-	mainThread->tid = -1;
+	mainThread->tid = 0;
 	mainThread->next = NULL;
 	mainThread->prev = NULL;
 

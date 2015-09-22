@@ -7,7 +7,7 @@
 #define SUCCESS 0
 #define ERROR -1
 
-int _GLOBAL_TID = 0;
+int _GLOBAL_TID = 1;
 
 // usar no scheduler, por enquanto esta sendo
 // usado so pra testes
@@ -138,7 +138,7 @@ void* terminateThread()
 
 		// libero o espaco de memoria alocado para a
 		// thread que terminou e sua stack
-		free(runningThread->context.uc_stack.ss_sp);
+		// printf("free\n");
 		free(runningThread);
 
 		TCB_t* nextThread = getNextThread();

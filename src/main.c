@@ -8,8 +8,6 @@
 
 #define MAX 100
 
-bool debug = true;
-
 pimutex_t ahoy_mutex;
 pimutex_t another_mutex;
 
@@ -23,7 +21,7 @@ void* inc(void* param)
 	
 	*i = *i + 1;
 
-	piyield();
+	// piyield();
 	printf("inc pos yield \n");
 	return NULL;
 }
@@ -50,9 +48,6 @@ void* mutex_test2(void* param)
 
 int main(int argc, char* argv[])
 {
-	// debug = true;
-
-
 	int* a = (int*) malloc(sizeof(int));
 	*a = 10;
 	
@@ -64,25 +59,18 @@ int main(int argc, char* argv[])
 	// int result = piwait(tid);
 	// printf("main: piwait chamado! \t resultado: %i\n", result);
 
-	picreate(100, &inc, a);
-	picreate(95, &inc, a);
-	picreate(91, &inc, a);
+	int tid0 = picreate(100, &inc, a);
+	int tid1 = picreate(95, &inc, a);
+	int tid2 = picreate(91, &inc, a);
 	
-	picreate(92, &inc, a);
-	picreate(93, &inc, a);
-	picreate(94, &inc, a);
+	int tid3 = picreate(92, &inc, a);
+	int tid4 = picreate(93, &inc, a);
+	int tid5 = picreate(94, &inc, a);
 
-	picreate(95, &inc, a);
+	// int tid6 = picreate(95, &inc, a);
 	
-	// int tid = picreate(20, &inc, a);
-	// picreate(97, &inc, a);
-	// picreate(98, &inc, a);
-	// picreate(98, &inc, a);
-	// picreate(99, &inc, a);
+	piwait(tid0);
 
-	piyield();
-
-	piwait(tid);
 	free(a);
 	
 	return 0;

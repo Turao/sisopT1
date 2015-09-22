@@ -10,7 +10,8 @@ LIB_DIR=../lib/
 # testes da libpithread
 #
 
-all: create yield wait mutex
+all: create wait
+# yield mutex
 
 # tests: create yield wait mutex
 
