@@ -116,9 +116,9 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	}
 
 	/**************************************************************/
-	printf(" **************************************************** \n");
-	printf(" \t\tCriando nova thread...   \n");
-	printf(" **************************************************** \n\n");
+	// printf(" **************************************************** \n");
+	// printf(" \t\tCriando nova thread...   \n");
+	// printf(" **************************************************** \n\n");
 	/**************************************************************/
 
 	TCB_t* newThread = (TCB_t*) malloc(sizeof(TCB_t));
@@ -241,7 +241,7 @@ int piwait(int tid)
 	}
 	else
 	{
-		printf("Thread TID: %i \t waiting for thread TID: %i \n",
+		// printf("Thread TID: %i \t waiting for thread TID: %i \n",
 		 waitingInfo->waiting->tid, waitingInfo->beingWaited->tid);
 		runThread(runningThread, nextThread);
 		return SUCCESS;
@@ -263,7 +263,6 @@ int pimutex_init(pimutex_t *mtx)
 
 int pilock(pimutex_t *mtx)
 {
-	printf("lock called\n");
 	if(mtx == NULL) return ERROR;
 
 	if(mainTCBCreated == FALSE) createMainTCB();
@@ -306,8 +305,5 @@ int piunlock(pimutex_t *mtx)
 	mtx->flag = LIVRE;
 	unblockMutexThreads(mtx);
 
-//	printAptos();
-//	printAptosLists();
-	printf("unlock called\n");
 	return SUCCESS;
 }

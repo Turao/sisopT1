@@ -22,31 +22,5 @@ teste_prio: teste_prio.c $(LIB_DIR)/libpithread.a
 mandel: mandel.c $(LIB_DIR)/libpithread.a
 	$(CC) -o mandel mandel.c -L$(LIB_DIR) -lpithread -lm -Wall
 
-
-# 
-# regras para compilacao e limpeza dos
-# testes da libpithread
-#
-
-tests: create yield wait mutex
-
-create:
-	$(CC) -o $(TESTS_BIN)create $(TESTS_SRC)create.c -L$(LIB_DIR) -lpithread -lm -Wall
-
-yield:
-	$(CC) -o $(TESTS_BIN)yield $(TESTS_SRC)yield.c -L$(LIB_DIR) -lpithread -lm -Wall
-
-wait:
-	$(CC) -o $(TESTS_BIN)wait $(TESTS_SRC)wait.c -L$(LIB_DIR) -lpithread -lm -Wall
-
-mutex:
-	$(CC) -o $(TESTS_BIN)mutex $(TESTS_SRC)mutex.c -L$(LIB_DIR) -lpithread -lm -Wall
-
-
-
 clean:
 	rm -rf exemplo mandel teste_vetor teste_prio *~
-
-
-
-

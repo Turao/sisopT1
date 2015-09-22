@@ -4,10 +4,6 @@
 #include "scheduler.h"
 #include "list.h"
 
-#define HIGH_PRIORITY_CREDITS 80
-#define MEDIUM_PRIORITY_CREDITS 40
-#define LOW_PRIORITY_CREDITS 0
-
 #define SUCCESS 0
 #define ERROR -1
 
