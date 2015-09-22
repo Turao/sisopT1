@@ -11,8 +11,8 @@ int _GLOBAL_TID = 0;
 
 // usar no scheduler, por enquanto esta sendo
 // usado so pra testes
-AptList aptos_ativos = NEW_APT_LIST;
-AptList aptos_expirados = NEW_APT_LIST;
+AptList* aptos_ativos = NULL;
+AptList* aptos_expirados = NULL;
 
 List blocked = NEW_LIST;
 
@@ -20,10 +20,31 @@ TCB_t* runningThread;
 
 WaitingList waitingList = NEW_WAITING_LIST;
 
+int initAptosAtivos()
+{
+	aptos_ativos = (AptList*) malloc(sizeof(AptList));
+	if(aptos_ativos == NULL) 
+	{
+		printf("Erro ao alocar lista de aptos ativos!\n");
+		return ERROR;
+	}
+	return SUCCESS;
+}
+
+int initAptosExpirados()
+{
+	aptos_expirados = (AptList*) malloc(sizeof(AptList));
+	if(aptos_expirados == NULL) 
+	{
+		printf("Erro ao alocar lista de aptos expirados!\n");
+		return ERROR;
+	}
+	return SUCCESS;
+}
 
 void runThread(TCB_t* oldRunning, TCB_t* threadToRun)
 {
-	printf("Chamando thread de tid: %i\n", threadToRun->tid);
+	// printf("Chamando thread de tid: %i\n", threadToRun->tid);
 	setRunningThread(threadToRun);
 	if(oldRunning != NULL)
 	{
@@ -43,19 +64,38 @@ TCB_t* getNextThread()
 {
 	TCB_t* nextThread = NULL;
 
-	if(aptos_ativos.highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.highPriorityQueue);
-	else if(aptos_ativos.mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.mediumPriorityQueue);
-	else if(aptos_ativos.lowPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos.lowPriorityQueue);
-
-	// list_print(aptos_ativos.highPriorityQueue);
-	// list_print(aptos_ativos.mediumPriorityQueue);
-	// list_print(aptos_ativos.lowPriorityQueue);
+	if(aptos_ativos->highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos->highPriorityQueue);
+	else if(aptos_ativos->mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos->mediumPriorityQueue);
+	else if(aptos_ativos->lowPriorityQueue.size > 0) nextThread = list_popFront(&aptos_ativos->lowPriorityQueue);
 
 	if(nextThread == NULL)
 	{
-		printf("Nao existe thread para executar!\n");
-		printf("Erro de manipulacao de threads no escalonador!\n");
-		return NULL;
+		// nao ha threads na lista de aptos ativos
+		// logo, devemos procurar na lista de aptos expirados
+		// e caso exista, trocamos os ponteiros.
+		// a lista de aptos ativos passa a ser a de aptos expirados
+		// e vice versa
+		if(aptos_expirados->highPriorityQueue.size > 0) nextThread = list_popFront(&aptos_expirados->highPriorityQueue);
+		else if(aptos_expirados->mediumPriorityQueue.size > 0) nextThread = list_popFront(&aptos_expirados->mediumPriorityQueue);
+		else if(aptos_expirados->lowPriorityQueue.size > 0) nextThread = list_popFront(&aptos_expirados->lowPriorityQueue);
+
+		if(nextThread != NULL)
+		{
+			AptList* swap;
+			swap = aptos_ativos;
+			aptos_ativos = aptos_expirados;
+			aptos_expirados = swap;
+		}
+		// caso nao exista nem na lista de expirados
+		// nao existe mais nenhuma thread para ser executada
+		// e provavelmente houve algum erro de manipulacao
+		// por parte do escalonador
+		else
+		{
+			printf("Nao existe thread para executar!\n");
+			printf("Erro de manipulacao de threads no escalonador!\n");
+			return NULL;
+		}
 	}
 
 	return nextThread;
@@ -75,10 +115,7 @@ void setRunningThread(TCB_t* thread)
 // pra que ele escolha a proxima thread
 void* terminateThread()
 {
-	printf("terminate running pointer %p\n",getRunningThread());
 	TCB_t* runningThread = getRunningThread();
-	printThread(getRunningThread());
-	// printThread(runningThread);
 	if(runningThread == NULL) 
 	{
 		printf("Nao existe thread em execucao!\n");
@@ -88,7 +125,7 @@ void* terminateThread()
 	else
 	{
 
-		printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
+		// printf("\n\t- A thread de tid %3i terminou de executar. -\n", runningThread->tid);
 
 		// checa se a thread estava sendo esperada por outra
 		// se estiver, libera a thread na fila de bloqueados
@@ -96,13 +133,13 @@ void* terminateThread()
 		if(waitingInfo != NULL)
 		{
 			unblockThread(waitingInfo->waiting->tid);
-			printf("\n\t- Desbloqueando thread de TID: %i. -\n", waitingInfo->waiting->tid);
+			// printf("\n\t- Desbloqueando thread de TID: %i. -\n", waitingInfo->waiting->tid);
 		}
 
 		// libero o espaco de memoria alocado para a
-		// thread que terminou
+		// thread que terminou e sua stack
+		free(runningThread->context.uc_stack.ss_sp);
 		free(runningThread);
-	
 
 		TCB_t* nextThread = getNextThread();
 		if(nextThread != NULL) runThread(NULL, nextThread);
@@ -113,18 +150,20 @@ void* terminateThread()
 
 void enqueueActive(TCB_t* thread)
 {
-	printf("Thread inserida na fila de aptos ativos.\n");
-	enqueue(&aptos_ativos, thread);
+	// printf("Thread inserida na fila de aptos ativos.\n");
+	if(aptos_ativos == NULL) initAptosAtivos();
+	if(aptos_expirados == NULL) initAptosExpirados();
 
-	list_print(aptos_ativos.highPriorityQueue);
-	list_print(aptos_ativos.mediumPriorityQueue);
-	list_print(aptos_ativos.lowPriorityQueue);
+	enqueue(aptos_ativos, thread);
 }
 
 void enqueueExpired(TCB_t* thread)
 {
-	printf("Thread inserida na fila de aptos expirados.\n");
-	enqueue(&aptos_expirados, thread);
+	// printf("Thread inserida na fila de aptos expirados.\n");
+	if(aptos_ativos == NULL) initAptosAtivos();
+	if(aptos_expirados == NULL) initAptosExpirados();
+
+	enqueue(aptos_expirados, thread);
 }
 
 // adiciona uma thread a sua fila correspondente
@@ -134,10 +173,10 @@ void enqueue(AptList* aptList, TCB_t* thread)
 	// adiciona a thread a sua respectiva
 	// fila, dependendo dos seus creditos
 	// de criacao
-	printf("Thread adicionada em: ");
+	// printf("Thread adicionada em: ");
 	if(thread->credReal > HIGH_PRIORITY_CREDITS)
 	{
-		printf("\t High Priority Queue\n");
+		// printf("\t High Priority Queue\n");
 		list_add(&aptList->highPriorityQueue, thread);
 		// list_print(highPriorityQueue);
 	}
@@ -145,16 +184,16 @@ void enqueue(AptList* aptList, TCB_t* thread)
 	{
 		if(thread->credReal > MEDIUM_PRIORITY_CREDITS)
 		{
-			printf("\t Medium Priority Queue\n");
+			// printf("\t Medium Priority Queue\n");
 			list_add(&aptList->mediumPriorityQueue, thread);
 			// list_print(mediumPriorityQueue);
 		}
 		else
 		{
-			printf("\t Low Priority Queue\n");
+			// printf("\t Low Priority Queue\n");
 			list_add(&aptList->lowPriorityQueue, thread);
 			// list_print(lowPriorityQueue);
-			printf("\n");
+			// printf("\n");
 		}
 	}
 }
@@ -179,21 +218,18 @@ TCB_t* getRunningThread()
 // e seu conteudo
 void printAptos()
 {
-	int active = aptos_ativos.highPriorityQueue.size +
-		aptos_ativos.mediumPriorityQueue.size +
-		aptos_ativos.lowPriorityQueue.size;
+	int active = aptos_ativos->highPriorityQueue.size +
+		aptos_ativos->mediumPriorityQueue.size +
+		aptos_ativos->lowPriorityQueue.size;
 
-	int expired = aptos_expirados.highPriorityQueue.size +
-		aptos_expirados.mediumPriorityQueue.size +
-		aptos_expirados.lowPriorityQueue.size;
+	int expired = aptos_expirados->highPriorityQueue.size +
+		aptos_expirados->mediumPriorityQueue.size +
+		aptos_expirados->lowPriorityQueue.size;
 
 	printf(" **************************************************** \n");
 	printf(" * Aptos Ativos: %i \t\t", active);
 	printf(" * Aptos Expirados: %i \n", expired);
 	printf(" **************************************************** \n");
-
-	//printf("\t Aptos Ativos\n");
-	//list_print(aptos_ativos);
 }
 
 // imprime o conteudo de uma thread
@@ -339,7 +375,7 @@ int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread)
 	thread->next = NULL;
 	mtx->last->next = thread;
 	mtx->last = thread;
-	printf("entered block thread\n");
+
 	return SUCCESS;
 }
 
@@ -372,19 +408,19 @@ int unblockMutexThreads(pimutex_t *mtx)
 
 void printAptosLists()
 {
-	list_print(aptos_ativos.highPriorityQueue);
-	list_print(aptos_ativos.mediumPriorityQueue);
-	list_print(aptos_ativos.lowPriorityQueue);
+	list_print(aptos_ativos->highPriorityQueue);
+	list_print(aptos_ativos->mediumPriorityQueue);
+	list_print(aptos_ativos->lowPriorityQueue);
 }
 
 AptList* getAptosAtivos()
 {
-	return &aptos_ativos;
+	return aptos_ativos;
 }
 
 AptList* getAptosExpirados()
 {
-	return &aptos_expirados;
+	return aptos_expirados;
 }
 
 WaitingList* getWaitingList()

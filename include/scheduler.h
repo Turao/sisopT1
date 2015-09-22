@@ -181,7 +181,9 @@ int unblockMutexThreads(pimutex_t *mtx);
 
 
 
-/* WAIT */
+/***********************************************/
+/****************** WAIT ***********************/
+
 /* Bloqueia a thread em execucao, passando-a para a lista de espera */
 int blockRunningThread();
 

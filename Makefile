@@ -15,11 +15,10 @@ INC_DIR=./include/
 BIN_DIR=./bin/
 SRC_DIR=./src/
 
-# all: regra1 regra2 regran
 all: pithread scheduler list waitingList main binary libpithread cleanObjs
 
 libpithread:
-	ar crs $(LIB_DIR)libpithread.a $(BIN_DIR)main.o $(BIN_DIR)pithread.o $(BIN_DIR)list.o  $(BIN_DIR)waitingList.o  $(BIN_DIR)scheduler.o
+	ar crs $(LIB_DIR)libpithread.a $(BIN_DIR)pithread.o $(BIN_DIR)list.o  $(BIN_DIR)waitingList.o  $(BIN_DIR)scheduler.o
 
 binary:
 	$(CC) -o $(BIN_DIR)main $(BIN_DIR)main.o $(BIN_DIR)pithread.o $(BIN_DIR)list.o  $(BIN_DIR)waitingList.o  $(BIN_DIR)scheduler.o  -Wall

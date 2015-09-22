@@ -67,7 +67,7 @@ int createMainTCB()
 {
 	TCB_t* mainThread = (TCB_t*) malloc(sizeof(TCB_t));
 	if (mainThread == NULL) return ERROR;
-	printf(" * Criando main thread...\n");
+	// printf(" * Criando main thread...\n");
     
 	mainThread->state = EXECUCAO;
 	mainThread->credCreate = MAIN_THREAD_CREDITS;
@@ -153,7 +153,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 
 	enqueueActive(newThread);
 
-	printThread(newThread);
+	// printThread(newThread);
 
 	return newThread->tid;
 }
@@ -242,7 +242,7 @@ int piwait(int tid)
 	else
 	{
 		// printf("Thread TID: %i \t waiting for thread TID: %i \n",
-		 waitingInfo->waiting->tid, waitingInfo->beingWaited->tid);
+		// waitingInfo->waiting->tid, waitingInfo->beingWaited->tid);
 		runThread(runningThread, nextThread);
 		return SUCCESS;
 	}
