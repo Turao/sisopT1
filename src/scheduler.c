@@ -379,29 +379,26 @@ int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread)
 	return SUCCESS;
 }
 
-// recebe um um mutex e retira todas as threads da lista
-// de bloqueados do mutex e incrementa 20 (vinte) creditos de cada thread
+// recebe um um mutex e retira a primeira thread da fila
+// de bloqueados do mutex, incrementando 20 (vinte) creditos
+// nela
 int unblockMutexThreads(pimutex_t *mtx)
 {
+	if(mtx == NULL) return ERROR;
 
-	TCB_t* currentThread = mtx->first;
+	TCB_t* toBeUnlocked = mtx->first;
 
-	mtx->first = NULL;
-	mtx->last = NULL;
-	
-	while(currentThread != NULL)
+	mtx->first = toBeUnlocked->next;
+	if(mtx->last == toBeUnlocked) mtx->last = NULL;
+
+	toBeUnlocked->state = APTO;
+	toBeUnlocked->credReal += UNBLOCK_INCREMENT;
+	if(toBeUnlocked->credReal > CREDITS_MAX)
 	{
-		currentThread->state = APTO;
-		currentThread->credReal += UNBLOCK_INCREMENT;
-		if(currentThread->credReal > CREDITS_MAX)
-		{
-			currentThread->credReal = CREDITS_MAX;
-		}
-
-		enqueueActive(currentThread);
-
-		currentThread = currentThread->next;
+		toBeUnlocked->credReal = CREDITS_MAX;
 	}
+
+	enqueueActive(toBeUnlocked);
 
 	return SUCCESS;
 }
