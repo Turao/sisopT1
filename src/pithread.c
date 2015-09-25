@@ -39,7 +39,7 @@ int allocExitContext()
 		
 	if(exit_context->uc_stack.ss_sp == NULL) // erro de alocacao de memoria
 	{
-		printf("Erro ao alocar a pilha do contexto de saida...\n");
+		// printf("Erro ao alocar a pilha do contexto de saida...\n");
 		//free(exit_context); // libera para nao ter mem. leak
 		return ERROR;
 	}
@@ -80,7 +80,7 @@ int createMainTCB()
 	mainThread->context.uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
 	if(mainThread->context.uc_stack.ss_sp == NULL)
 	{
-		printf("Erro ao alocar a pilha do contexto da nova thread...\n");
+		// printf("Erro ao alocar a pilha do contexto da nova thread...\n");
 		free(mainThread);
 		return ERROR;
 	}
@@ -136,7 +136,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	newThread->context.uc_stack.ss_sp = (char*) malloc(sizeof(SIGSTKSZ));
 	if(newThread->context.uc_stack.ss_sp == NULL)
 	{
-		printf("Erro ao alocar a pilha do contexto da nova thread...\n");
+		// printf("Erro ao alocar a pilha do contexto da nova thread...\n");
 		free(newThread);
 		return ERROR;
 	}
@@ -185,7 +185,7 @@ int piyield(void)
 
 	if(nextThread == NULL)
 	{
-		printf(" Erro ao escolher proxima thread! \n");
+		// printf(" Erro ao escolher proxima thread! \n");
 		return ERROR;
 	}
 	else
@@ -236,7 +236,7 @@ int piwait(int tid)
 	TCB_t* nextThread = getNextThread();
 	if(nextThread == NULL)
 	{
-		printf(" Erro ao escolher proxima thread! \n");
+		// printf(" Erro ao escolher proxima thread! \n");
 		return ERROR;
 	}
 	else
@@ -285,7 +285,7 @@ int pilock(pimutex_t *mtx)
 
 		if(nextThread == NULL)
 		{
-			printf(" Erro ao escolher proxima thread! \n");
+			// printf(" Erro ao escolher proxima thread! \n");
 			return ERROR;
 		}
 		else

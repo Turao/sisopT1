@@ -25,7 +25,7 @@ int initAptosAtivos()
 	aptos_ativos = (AptList*) malloc(sizeof(AptList));
 	if(aptos_ativos == NULL) 
 	{
-		printf("Erro ao alocar lista de aptos ativos!\n");
+		// printf("Erro ao alocar lista de aptos ativos!\n");
 		return ERROR;
 	}
 	return SUCCESS;
@@ -36,7 +36,7 @@ int initAptosExpirados()
 	aptos_expirados = (AptList*) malloc(sizeof(AptList));
 	if(aptos_expirados == NULL) 
 	{
-		printf("Erro ao alocar lista de aptos expirados!\n");
+		// printf("Erro ao alocar lista de aptos expirados!\n");
 		return ERROR;
 	}
 	return SUCCESS;
@@ -92,8 +92,8 @@ TCB_t* getNextThread()
 		// por parte do escalonador
 		else
 		{
-			printf("Nao existe thread para executar!\n");
-			printf("Erro de manipulacao de threads no escalonador!\n");
+			// printf("Nao existe thread para executar!\n");
+			// printf("Erro de manipulacao de threads no escalonador!\n");
 			return NULL;
 		}
 	}
@@ -118,8 +118,8 @@ void* terminateThread()
 	TCB_t* runningThread = getRunningThread();
 	if(runningThread == NULL) 
 	{
-		printf("Nao existe thread em execucao!\n");
-		printf("Erro de manipulacao de threads no escalonador!\n");
+		// printf("Nao existe thread em execucao!\n");
+		// printf("Erro de manipulacao de threads no escalonador!\n");
 		return NULL;
 	}
 	else
@@ -218,37 +218,37 @@ TCB_t* getRunningThread()
 // e seu conteudo
 void printAptos()
 {
-	int active = aptos_ativos->highPriorityQueue.size +
-		aptos_ativos->mediumPriorityQueue.size +
-		aptos_ativos->lowPriorityQueue.size;
+	// int active = aptos_ativos->highPriorityQueue.size +
+	// 	aptos_ativos->mediumPriorityQueue.size +
+	// 	aptos_ativos->lowPriorityQueue.size;
 
-	int expired = aptos_expirados->highPriorityQueue.size +
-		aptos_expirados->mediumPriorityQueue.size +
-		aptos_expirados->lowPriorityQueue.size;
+	// int expired = aptos_expirados->highPriorityQueue.size +
+	// 	aptos_expirados->mediumPriorityQueue.size +
+	// 	aptos_expirados->lowPriorityQueue.size;
 
-	printf(" **************************************************** \n");
-	printf(" * Aptos Ativos: %i \t\t", active);
-	printf(" * Aptos Expirados: %i \n", expired);
-	printf(" **************************************************** \n");
+	// printf(" **************************************************** \n");
+	// printf(" * Aptos Ativos: %i \t\t", active);
+	// printf(" * Aptos Expirados: %i \n", expired);
+	// printf(" **************************************************** \n");
 }
 
 // imprime o conteudo de uma thread
 void printThread(TCB_t* thread)
 {
-	if(thread == NULL) printf("\n NULL THREAD \n");
-	printf("\n");
-	printf(" * Thread TID: %i \n", thread->tid);
-	printf(" * Thread state: %i \n", thread->state);
-	printf(" * Thread credits: %i \n", thread->credCreate);
-	printf(" * Thread dynamic credits: %i \n", thread->credReal);
+	// if(thread == NULL) printf("\n NULL THREAD \n");
+	// printf("\n");
+	// printf(" * Thread TID: %i \n", thread->tid);
+	// printf(" * Thread state: %i \n", thread->state);
+	// printf(" * Thread credits: %i \n", thread->credCreate);
+	// printf(" * Thread dynamic credits: %i \n", thread->credReal);
 
-	if(thread->prev != NULL) printf(" * Prev Thread TID: %i \n", thread->prev->tid);
-	else printf(" * Prev Thread TID: NULL \n"); 
+	// if(thread->prev != NULL) printf(" * Prev Thread TID: %i \n", thread->prev->tid);
+	// else printf(" * Prev Thread TID: NULL \n"); 
 
-	if(thread->next != NULL) printf(" * Next Thread TID: %i \n", thread->next->tid);
-	else printf(" * Next Thread TID: NULL \n");	
+	// if(thread->next != NULL) printf(" * Next Thread TID: %i \n", thread->next->tid);
+	// else printf(" * Next Thread TID: NULL \n");	
 
-	printf("\n");
+	// printf("\n");
 
 }
 

@@ -229,17 +229,17 @@ TCB_t* list_popFront(List* list)
 /* Imprime o conteudo de uma lista */
 void list_print(List list)
 {
-	printf("\t\t***\t\t List Content: \t\t %3i elements \t***\t\n\n", list.size);
+	// printf("\t\t***\t\t List Content: \t\t %3i elements \t***\t\n\n", list.size);
 	int i = 0;
 	TCB_t* currentTCB = list.first;
 	for (; i < list.size; i++)
 	{
-		printf("\t Thread TID: %3i \t CredCreate: %3i \t CredReal: %3i \t at: %p \n",
-		currentTCB->tid, currentTCB->credCreate, currentTCB->credReal, currentTCB);
+		// printf("\t Thread TID: %3i \t CredCreate: %3i \t CredReal: %3i \t at: %p \n",
+		// currentTCB->tid, currentTCB->credCreate, currentTCB->credReal, currentTCB);
 
 		currentTCB = currentTCB->next;
 	}
-	printf("\n");
+	// printf("\n");
 }
 
 
