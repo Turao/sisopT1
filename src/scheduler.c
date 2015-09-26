@@ -373,7 +373,7 @@ int blockThreadForMutex(pimutex_t *mtx, TCB_t* thread)
 
 	thread->prev = mtx->last;
 	thread->next = NULL;
-	mtx->last->next = thread;
+	if(mtx->last != NULL) mtx->last->next = thread;
 	mtx->last = thread;
 
 	return SUCCESS;
@@ -388,18 +388,20 @@ int unblockMutexThreads(pimutex_t *mtx)
 
 	TCB_t* toBeUnlocked = mtx->first;
 
-	mtx->first = toBeUnlocked->next;
-	if(mtx->last == toBeUnlocked) mtx->last = NULL;
-
-	toBeUnlocked->state = APTO;
-	toBeUnlocked->credReal += UNBLOCK_INCREMENT;
-	if(toBeUnlocked->credReal > CREDITS_MAX)
+	if(toBeUnlocked != NULL)
 	{
-		toBeUnlocked->credReal = CREDITS_MAX;
+		mtx->first = toBeUnlocked->next;
+		if(mtx->last == toBeUnlocked) mtx->last = NULL;
+
+		toBeUnlocked->state = APTO;
+		toBeUnlocked->credReal += UNBLOCK_INCREMENT;
+		if(toBeUnlocked->credReal > CREDITS_MAX)
+		{
+			toBeUnlocked->credReal = CREDITS_MAX;
+		}
+
+		enqueueActive(toBeUnlocked);
 	}
-
-	enqueueActive(toBeUnlocked);
-
 	return SUCCESS;
 }
 
