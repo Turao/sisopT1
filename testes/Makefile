@@ -11,23 +11,20 @@ LIB_DIR=../lib/
 #
 
 all: create wait mutex mutex-wait
-# yield mutex
 
-# tests: create yield wait mutex
-
-create:
+create: create.c $(LIB_DIR)/libpithread.a
 	$(CC) -o create create.c -L$(LIB_DIR) -lpithread -lm -Wall
 
-yield:
+yield: yield.c $(LIB_DIR)/libpithread.a
 	$(CC) -o yield yield.c -L$(LIB_DIR) -lpithread -lm -Wall
 
-wait:
+wait: wait.c $(LIB_DIR)/libpithread.a
 	$(CC) -o wait wait.c -L$(LIB_DIR) -lpithread -lm -Wall
 
-mutex:
+mutex: mutex.c $(LIB_DIR)/libpithread.a
 	$(CC) -o mutex mutex.c -L$(LIB_DIR) -lpithread -lm -Wall
 
-mutex-wait:
+mutex-wait: mutex-wait.c $(LIB_DIR)/libpithread.a
 	$(CC) -o mutex-wait mutex-wait.c -L$(LIB_DIR) -lpithread -lm -Wall
 
 clean:
