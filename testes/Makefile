@@ -10,7 +10,7 @@ LIB_DIR=../lib/
 # testes da libpithread
 #
 
-all: create wait mutex
+all: create wait mutex mutex-wait
 # yield mutex
 
 # tests: create yield wait mutex
@@ -27,5 +27,8 @@ wait:
 mutex:
 	$(CC) -o mutex mutex.c -L$(LIB_DIR) -lpithread -lm -Wall
 
+mutex-wait:
+	$(CC) -o mutex-wait mutex-wait.c -L$(LIB_DIR) -lpithread -lm -Wall
+
 clean:
-	rm -rf create yield wait mutex pares *~
+	rm -rf create yield wait mutex pares mutex-wait *~
