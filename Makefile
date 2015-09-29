@@ -15,9 +15,11 @@ INC_DIR=./include/
 BIN_DIR=./bin/
 SRC_DIR=./src/
 
-all: pithread scheduler list waitingList main binary libpithread cleanObjs
+all: pithread scheduler list waitingList libpithread cleanObjs
 
 libpithread:
+	rm -rf $(LIB_DIR)
+	mkdir $(LIB_DIR)
 	ar crs $(LIB_DIR)libpithread.a $(BIN_DIR)pithread.o $(BIN_DIR)list.o  $(BIN_DIR)waitingList.o  $(BIN_DIR)scheduler.o
 
 binary:
