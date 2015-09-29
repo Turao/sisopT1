@@ -18,7 +18,7 @@
 #define ERROR -1
 
 #define MAX_CRED 100
-#define MIN_CRED 0
+#define MIN_CRED 1
 
 #define MAIN_THREAD_CREDITS 100
 
@@ -126,26 +126,20 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 
 	TCB_t* newThread = (TCB_t*) malloc(sizeof(TCB_t));
 	if(newThread == NULL) return ERROR; // erro de alocacao de memoria
-
-	newThread->tid = getNewTID();	
-	newThread->state = APTO;
 	
-	if(credCreate > 100)
-	{
-		newThread->credCreate = MAX_CRED;
-		newThread->credReal = MAX_CRED;
-	}
-	else if(credCreate < 0)
-	{
-		newThread->credCreate = MIN_CRED;
-		newThread->credReal = MIN_CRED;
-	}
-	else
+	if(MIN_CRED <= credCreate && credCreate >= MAX_CRED)
 	{
 		newThread->credCreate = credCreate;
 		newThread->credReal = credCreate;
 	}
+	else
+	{
+		free(newThread);
+		return ERROR;
+	}
 
+	newThread->tid = getNewTID();	
+	newThread->state = APTO;
 	// aloca a pilha nova da thread em execucao
 	// e define o contexto de saida da thread para
 	// o contexto de saida geral
