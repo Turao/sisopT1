@@ -17,6 +17,9 @@
 #define SUCCESS 0
 #define ERROR -1
 
+#define MAX_CRED 100
+#define MIN_CRED 0
+
 #define MAIN_THREAD_CREDITS 100
 
 // no caso, o contexto de saida sera usado para 
@@ -126,8 +129,22 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 
 	newThread->tid = getNewTID();	
 	newThread->state = APTO;
-	newThread->credCreate = credCreate;
-	newThread->credReal = credCreate;
+	
+	if(credCreate > 100)
+	{
+		newThread->credCreate = MAX_CRED;
+		newThread->credReal = MAX_CRED;
+	}
+	else if(credCreate < 0)
+	{
+		newThread->credCreate = MIN_CRED;
+		newThread->credReal = MIN_CRED;
+	}
+	else
+	{
+		newThread->credCreate = credCreate;
+		newThread->credReal = credCreate;
+	}
 
 	// aloca a pilha nova da thread em execucao
 	// e define o contexto de saida da thread para
@@ -151,7 +168,8 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	// e o contexto que sera utilizado nela
 	makecontext(&newThread->context, (void (*)(void)) start, 1, (void*) arg);
 
-	enqueueActive(newThread);
+	if(credCreate <= 0) enqueueExpired(newThread);
+	else enqueueActive(newThread);
 
 	// printThread(newThread);
 
