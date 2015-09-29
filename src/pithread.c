@@ -127,7 +127,7 @@ int picreate (int credCreate, void* (*start)(void*), void *arg)
 	TCB_t* newThread = (TCB_t*) malloc(sizeof(TCB_t));
 	if(newThread == NULL) return ERROR; // erro de alocacao de memoria
 	
-	if(MIN_CRED <= credCreate && credCreate >= MAX_CRED)
+	if(MIN_CRED <= credCreate && credCreate <= MAX_CRED)
 	{
 		newThread->credCreate = credCreate;
 		newThread->credReal = credCreate;
